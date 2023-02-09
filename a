@@ -1,0 +1,4 @@
+source /home/toshi/work/code_django/portfolio_reservation/venv_rsv/bin/activate
+
+pip install -r requirements.txt
+

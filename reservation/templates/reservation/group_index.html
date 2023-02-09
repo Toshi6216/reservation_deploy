@@ -1,0 +1,22 @@
+{% extends 'reservation/base.html' %}
+
+{% block content %}
+    <div class="my-5">
+        <h1>group!</h1>
+    </div>
+    {% for group in group_data %}
+    <div class="card mb-3 col-lg-auto" style="">
+        <div class="row no-gutters">
+
+            <div class="col-md-8">
+                <div class="card-body">
+                    <h5 class="card-title">#{{ group.id }}/{{ group.group_name }}</h5>
+                    <p class="card-text">{{ group.group_detail|truncatechars:100 }}</p>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+    {% endfor %}
+
+{% endblock %}
