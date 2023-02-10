@@ -12,6 +12,9 @@
                 <div class="card-body">
                     <h5 class="card-title">#{{ event.id }}/{{ event.event_title }}</h5>
                     <p class="card-text">{{ event.event_detail|truncatechars:100 }}</p>
+                    
+                        <a href="{% url 'event_edit' event.pk  %} " class="nav-link">event編集</a>
+                    
                 </div>
             </div>
             

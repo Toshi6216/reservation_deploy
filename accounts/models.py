@@ -136,6 +136,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
     first_name = models.CharField('姓', max_length=150)
     last_name = models.CharField('名', max_length=150)
+    nickname = models.CharField('ニックネーム', max_length=150,  null=True, blank=True)
     active = models.BooleanField(default=True)
     staff = models.BooleanField(default=False) 
     admin = models.BooleanField(default=False) 

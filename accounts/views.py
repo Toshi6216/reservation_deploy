@@ -22,7 +22,7 @@ class OnlyYouMixin(UserPassesTestMixin):
 #Profile内容確認用view
 class ProfileView(OnlyYouMixin, DetailView):
     model = CustomUser
-    template_name = 'accounts/profile.html'
+    template_name = 'account/profile.html'
 
 #class LoginView(views.LoginView):
 #    template_name = 'accounts/login.html'

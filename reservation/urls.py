@@ -5,4 +5,5 @@ urlpatterns = [
     path('',views.IndexView.as_view(), name="home"),
     path('event/',views.EventView.as_view(), name="event"),
     path('group/',views.GroupView.as_view(), name="group"),
+    path('event_edit/<int:pk>/',views.EventEditView.as_view(), name="event_edit"),
 ]
