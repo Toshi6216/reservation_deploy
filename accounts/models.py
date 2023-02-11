@@ -5,19 +5,19 @@ from django.contrib.auth.models import UserManager, PermissionsMixin
 from django.utils import timezone
 from reservation.models import Group, Event
 
-class UserType(models.Model):
-    """ユーザー種別"""
-    typename = models.CharField(
-        verbose_name = 'ユーザー種別', 
-        max_length = 150
-        )
-    
-    def __str__(self):
-        return f'{self.id} - {self.typename}'
-
-USERTYPE_STAFF = 100
-USERTYPE_MEMBER = 200
-USERTYPE_DEFAULT = USERTYPE_MEMBER #デフォルトはmember
+#class UserType(models.Model):
+#    """ユーザー種別"""
+#    typename = models.CharField(
+#        verbose_name = 'ユーザー種別', 
+#        max_length = 150
+#        )
+#    
+#    def __str__(self):
+#        return f'{self.id} - {self.typename}'
+#
+#USERTYPE_STAFF = 100
+#USERTYPE_MEMBER = 200
+#USERTYPE_DEFAULT = USERTYPE_MEMBER #デフォルトはmember
 
 #class UserManager(UserManager):
 #
@@ -133,21 +133,21 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
         max_length=255,
         unique=True,
         )
-
-    first_name = models.CharField('姓', max_length=150)
-    last_name = models.CharField('名', max_length=150)
+    
+    first_name = models.CharField('名', max_length=150)
+    last_name = models.CharField('姓', max_length=150)
     nickname = models.CharField('ニックネーム', max_length=150,  null=True, blank=True)
     active = models.BooleanField(default=True)
     staff = models.BooleanField(default=False) 
     admin = models.BooleanField(default=False) 
     
-    userType = models.ForeignKey(
-        UserType, 
-        verbose_name='ユーザー種別',
-        null=True,
-        blank=True,
-        on_delete=models.PROTECT
-    )
+#    userType = models.ForeignKey(
+#        UserType,  
+#        verbose_name='ユーザー種別',
+#        null=True,
+#        blank=True,
+#        on_delete=models.PROTECT
+#    )
 
     objects = UserManager()
     EMAIL_FIELD = 'email'

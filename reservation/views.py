@@ -1,9 +1,10 @@
 from django.shortcuts import render
 from django.views.generic import TemplateView, View, UpdateView
 from .models import Group, Event
-from .forms import EventForm
+from .forms import EventForm, GroupForm
 from accounts.models import CustomUser
 from django.urls import reverse_lazy
+from django.http import HttpResponse
 
 class IndexView(TemplateView):
     template_name = 'reservation/index.html'
@@ -30,4 +31,14 @@ class EventEditView(UpdateView):
     form_class = EventForm
     success_url = reverse_lazy('event')
 
-    
+    def get(self, request, **kwargs):
+        #スタッフユーザーで無ければHTMLを返す　遷移させる
+        if not request.user.is_staff:
+            return HttpResponse('<h1>%sさんはアクセスできませぬ</h1>' % request.user.nickname)
+        return super().get(request)
+
+class GroupEditView(UpdateView):
+    model = Group
+    template_name = 'reservation/group_form.html'
+    form_class = GroupForm
+    success_url = reverse_lazy('group')

@@ -6,3 +6,7 @@ class EventForm(forms.ModelForm):
         model = Event
         fields = ("event_title", "event_detail")
         
+class GroupForm(forms.ModelForm):
+    class Meta:
+        model = Group
+        fields = ("group_name", "group_detail")
