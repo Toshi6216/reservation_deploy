@@ -1,0 +1,25 @@
+{% extends 'reservation/base.html' %}
+
+{% block content %}
+    <div class="my-5">
+        <h1>group-detail!</h1>
+    </div>
+
+    <div class="card mb-3 col-lg-auto" style="">
+        <div class="row no-gutters">
+
+            <div class="col-md-8">
+                <div class="card-body">
+                    <h5 class="card-title">#{{ group_data.pk }}/{{ group_data.group_name }}</h5>
+                    <p class="card-text">{{ group_data.group_detail }}</p>
+                    <p class="card-text">{{ applying_data.applying_user }}</p>
+                </div>
+                {% if user.is_staff %}
+                    <a href="{% url 'group_edit' group_data.pk  %} " class="nav-link">group編集</a>
+                {% endif %}
+            </div>
+            
+        </div>
+    </div>
+
+{% endblock %}

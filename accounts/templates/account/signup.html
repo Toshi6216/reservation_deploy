@@ -11,7 +11,7 @@
     {% csrf_token %}
         <h2>{% trans "Sign Up" %}</h2>
         {{ form | crispy }}
-        <input type="hidden" name="userType" value="1" />
+    <!--    <input type="hidden" name="userType" value="1" /> -->
         {% if redirect_field_value %}
         <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
         

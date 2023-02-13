@@ -3,8 +3,10 @@ from django.views import View
 from allauth.account import views  
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.views.generic import CreateView, DetailView, UpdateView
+from django.urls import reverse_lazy, reverse
 
 from accounts.models import CustomUser
+from .forms import ProfileForm
 
 #user確認用view
 class OnlyYouMixin(UserPassesTestMixin):
@@ -20,4 +22,10 @@ class ProfileView(OnlyYouMixin, DetailView):
     model = CustomUser
     template_name = 'account/profile.html'
 
-
+class ProfileEditView(OnlyYouMixin, UpdateView):
+    model = CustomUser
+    template_name = 'account/profile_form.html'
+    form_class = ProfileForm
+    
+    def get_success_url(self):
+        return reverse("profile", kwargs={"pk": self.kwargs["pk"]})
