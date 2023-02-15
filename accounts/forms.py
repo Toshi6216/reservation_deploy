@@ -1,5 +1,6 @@
 from django import forms
-from django.contrib.auth.forms import ReadOnlyPasswordHashField
+from django.contrib.auth.forms import ReadOnlyPasswordHashField, UserCreationForm
+from allauth.account.forms import SignupForm
 
 from .models import CustomUser
 
@@ -30,3 +31,22 @@ class ProfileForm(forms.ModelForm):
 #        if commit:
 #            user.save()
 #        return user
+
+class SignupForm(UserCreationForm):
+    
+    class Meta:
+        model = CustomUser
+        fields = ['email','first_name', 'last_name']
+        
+   # def signup(self, request, user):
+   #     user.first_name = self.cleaned_data['first_name']
+   #     user.last_name = self.cleaned_data['last_name']
+   #     user.save()
+   #     return user
+
+#    first_name = models.CharField('名', max_length=150)
+#    last_name = models.CharField('姓', max_length=150)
+#    nickname = models.CharField('ニックネーム', max_length=150,  null=True, blank=True)
+#    active = models.BooleanField(default=True)
+#    staff = models.BooleanField(default=False) #staffかどうか
+#    admin = models.BooleanField(default=False) 

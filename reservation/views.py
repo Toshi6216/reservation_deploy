@@ -5,9 +5,17 @@ from .forms import EventForm, GroupForm
 from accounts.models import CustomUser
 from django.urls import reverse_lazy
 from django.http import HttpResponse
+from django.template import loader
 
 class IndexView(TemplateView):
     template_name = 'reservation/index.html'
+
+def calendarView(request):
+    """
+    カレンダー画面
+    """
+    template = loader.get_template("reservation/calendar.html")
+    return HttpResponse(template.render())
 
 class EventView(View):
     #このviewがコールされたら最初にget関数が呼ばれる
@@ -61,7 +69,7 @@ class GroupDetailView(View):
         print(name)
         print(request.user in name)
         if not request.user in name:
-            return HttpResponse('<h1>%sさんはMemberではありませぬ</h1>' % request.user.nickname, )
+            return HttpResponse('<h1>%sさんは%sのMemberではありませぬ</h1>' % (request.user.nickname, group_data.group_name ))
         
 
         return render(request, 'reservation/group_detail.html',{

@@ -57,7 +57,6 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     staff = models.BooleanField(default=False) #staffかどうか
     admin = models.BooleanField(default=False) 
 
-
     objects = UserManager()
     EMAIL_FIELD = 'email'
     USERNAME_FIELD = 'email'
@@ -87,11 +86,9 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
 
 
-    class Meta:
+    class Meta(AbstractBaseUser.Meta):
         db_table = 'custom_user'
-#        verbose_name = ('user')
-#        verbose_name_plural = ('users')
-#        abstract = True
+
 
 class StaffUser(models.Model):
     user = models.OneToOneField(

@@ -8,6 +8,7 @@
 {% block content %}
 <div class="allauth_container">
     <form class="signup allauth_form" id="signup_form" method="post" action="{% url 'account_signup' %}">
+    
     {% csrf_token %}
         <h2>{% trans "Sign Up" %}</h2>
         {{ form | crispy }}

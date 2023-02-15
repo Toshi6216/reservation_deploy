@@ -157,4 +157,9 @@ ACCOUNT_USERNAME_REQUIRED = False
 ACCOUNT_USER_MODEL_USERNAME_FIELD = None
 
 #使用するアカウントアダプター
-#ACCOUNT_ADAPTER = 'accounts.adapter.AccountAdapter'
+ACCOUNT_ADAPTER = 'accounts.adapter.AccountAdapter'
+
+#signupformを指定
+ACCOUNT_FORMS = {
+    'signup' : 'accounts.forms.SignupForm',
+}

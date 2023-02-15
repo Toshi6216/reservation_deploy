@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect
 from django.views import View
 from allauth.account import views  
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from django.views.generic import CreateView, DetailView, UpdateView
+from django.views.generic import CreateView, DetailView, UpdateView, TemplateView
 from django.urls import reverse_lazy, reverse
 
 from accounts.models import CustomUser
@@ -29,3 +29,4 @@ class ProfileEditView(OnlyYouMixin, UpdateView):
     
     def get_success_url(self):
         return reverse("profile", kwargs={"pk": self.kwargs["pk"]})
+
