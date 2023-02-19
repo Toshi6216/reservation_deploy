@@ -7,4 +7,6 @@ urlpatterns = [
     path('', include('reservation.urls')),
     path('accounts/', include('accounts.urls')),
     path('accounts/', include("allauth.urls")),
+    path('cldr/', include('sch_calendar.urls')),
+    path('fcal/', include('full_calendar.urls')),
 ]
