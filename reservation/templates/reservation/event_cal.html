@@ -1,0 +1,66 @@
+{% extends 'reservation/base.html' %}
+
+{% block content %}
+        <a class="btn btn-warning" href="{% url 'event_cal' %}">今月</a>
+        <a class="btn btn-primary" href="{% url 'event_cal' month_previous.year month_previous.month %}">前月</a>
+    
+        {{ month_current | date:"Y年m月" }}
+        <a class="btn btn-primary" href="{% url 'event_cal' month_next.year month_next.month %}">次月</a>
+        
+
+    <table class="table" style="table-layout:fixed;">
+        <thead>
+            <tr>
+                {% for w in week_names %}
+                    <th>{{ w }}</th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+        {% for week in month_days %}
+            <tr>
+                {% for day in week %}
+                    {% if now == day %}
+                        <td class="table-success" style="width:80px;">
+                    {% else %}
+                        <td style="width:80px;">
+                    {% endif %}
+
+                    {% if month_current.month != day.month %}
+                        {{ day | date:"m/d" }}
+                    {% else %}
+                        {{ day.day }}
+                    {% endif %}
+                        </td>
+                {% endfor %}
+            </tr>
+            {% endfor %}
+
+ 
+
+        </tbody>
+
+    </table>
+
+    
+    <div class="card mb-3 col-lg-auto" style="">
+    {% for event in event_data %}
+        <div class="row no-gutters">
+
+            <div class="col-md-8">
+                <div class="card-body">
+                
+                    <h5 class="card-title">#{{ event.id }}/{{ event.event_title }}</h5>
+                    <p class="card-text">{{ event.event_detail|truncatechars:100 }}</p>
+                    <p class="card-text"><a href="{% url 'group_detail'  event.group.pk  %} " class="nav-link">{{ event.group }}</a></p>
+                    {% if user.is_staff %}
+                        <a href="{% url 'event_edit' event.pk  %} " class="nav-link">event編集</a>
+                    {% endif %}
+                </div>
+            </div>
+     {% endfor %}
+        </div>
+       
+    {% comment %} </div>  {% endcomment %}
+
+{% endblock %}

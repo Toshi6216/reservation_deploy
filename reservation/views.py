@@ -10,6 +10,8 @@ from django.http import Http404
 import time
 import json
 from django.middleware.csrf import get_token
+from django.views import generic
+from . import mixins
 
 class IndexView(TemplateView):
     template_name = 'reservation/index.html'
@@ -61,38 +63,33 @@ class GroupDetailView(View):
         approved_data = Approved.objects.filter(
             group = group_data)
 
-        names = [data.approved_user for data in approved_data]
-        print(f"approved_data: {approved_data}")
-        print(type(approved_data))
-        print(f"names:{names}")
-        print(f"request.user:{request.user}")
-        print(request.user in names)
+        names = [data.approved_user for data in approved_data] 
+        """グループ加入の承認済みデータのリストに名前が入っていないと別ページにリダイレクトされる"""
+        # print(f"approved_data: {approved_data}")
+        # print(type(approved_data))
+        # print(f"names:{names}")
+        # print(f"request.user:{request.user}")
+        # print(request.user in names)
         if not request.user in names:
             return HttpResponse('<h1>%sさんは%sのMemberではありませぬ</h1>' % (request.user.nickname, group_data.group_name ))
-        
 
         return render(request, 'reservation/group_detail.html',{
             'group_data':group_data,
             'approved_data':approved_data,
         })
 
-# class GroupDetailView(View):
-#     def get(self, request, *args, **kwargs):
-#         group_data = Group.objects.get(id=self.kwargs['pk'])
-#         applying_data = Applying.objects.filter(
-#             applying_group = group_data)
 
-#         name = [data.applying_user for data in applying_data]
-#         print(applying_data)
-#         print(type(applying_data))
-#         print(name)
-#         print(request.user in name)
-#         if not request.user in name:
-#             return HttpResponse('<h1>%sさんは%sのMemberではありませぬ</h1>' % (request.user.nickname, group_data.group_name ))
+
+class EventCalView(mixins.MonthCalendarMixin, generic.TemplateView):
+    template_name = 'reservation/event_cal.html'
+    model = Event
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        calendar_context = self.get_month_calendar()
+        event_data = Event.objects.order_by('-id') #イベントのデータを読み出し
+        context.update(calendar_context)
+        context['event_data'] = event_data #イベントのデータをコンテキストで渡す
         
+        return context
 
-#         return render(request, 'reservation/group_detail.html',{
-#             'group_data':group_data,
-#             'applying_data':applying_data
-#         })
-
+# event_data = Event.objects.order_by('-id') #新しいものから順番に並べる
