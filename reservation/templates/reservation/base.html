@@ -15,52 +15,72 @@
 
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <div class="container">
-            <ul class="navbar-nav ml-auto">
-                <li class="nav-item">
-                    <a href="/" class="nav-link">home</a>
-                </li>
+    <!--navbar-->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container">
+    <a class="navbar-brand" href="{% url 'home' %}">
+    
+    みんなの予約サイト
+    
+    </a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
 
-                <li class="nav-item">
-                    <a href="{% url 'fullcalendar' %}" class="nav-link">fullcalendar</a>
-                </li>
-                <li class="nav-item">
-                    <a href="{% url 'event_cal' %}" class="nav-link">calendar</a>
-                </li>
-                {% if user.is_authenticated %}
-                <li class="nav-item">
-                    <a href="{% url 'profile' user.pk %}" class="nav-link">Profile</a>
-                </li>
-                <li class="nav-item">
-                    <a href="{% url 'account_logout' %}" class="nav-link">logout</a>
-                </li>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav ml-auto">
+        <li class="nav-item">
+            <a class="nav-link" href="{% url 'home' %}">Home <span class="sr-only"></span></a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="{% url 'fullcalendar' %}">fullcalendar<span class="sr-only"></span></a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="{% url 'event_cal' %}">calendar<span class="sr-only"></span></a>
+        </li>
 
-                <li class="nav-item">
-                    <a href="{% url 'event' %}" class="nav-link">event</a>
-                </li>
-                <li class="nav-item">
-                    <a href="{% url 'group' %}" class="nav-link">group</a>
-                </li>
-                
-                {% else %}
-                <li class="nav-item">
-                    <a href="{% url 'account_login' %}" class="nav-link">Login</a>
-                </li>
-                <li class="nav-item">
-                    <a href="{% url 'account_signup' %}" class="nav-link">signup</a>
-                </li>
-                {% endif %}
-                
 
-            </ul>
-        </div>
-    </nav>
+        {% if user.is_authenticated %}
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'profile' user.pk %}">Profile<span class="sr-only"></span></a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'account_logout' %}">ログアウト <span class="sr-only"></span></a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'gp_event_cal' %}">グループイベント <span class="sr-only"></span></a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'event' %}">イベント <span class="sr-only"></span></a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'group' %}">グループ <span class="sr-only"></span></a>
+            </li>
+
+
+        {% else %}
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'account_signup' %}">サインイン <span class="sr-only"></span></a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'account_login' %}">ログイン <span class="sr-only"></span></a>
+            </li>
+
+        {% endif %}
+        </ul>
+
+    </div>
+    </div>
+    </nav> 
+    <!--navbar-->
+    
 
     <main>
         <div class="container">
+ 
             {% block content %}
             {% endblock %}
+
         </div>
     </main>
 

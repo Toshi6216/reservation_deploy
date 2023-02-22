@@ -11,6 +11,7 @@ urlpatterns = [
     path('group_detail/<int:pk>/',views.GroupDetailView.as_view(), name="group_detail"),
     path('event_cal/',views.EventCalView.as_view(), name="event_cal"),
     path('event_cal/<int:year>/<int:month>/',views.EventCalView.as_view(), name="event_cal"),
-
+    path('gp_event_cal/<int:year>/<int:month>/',views.GpEventCalView.as_view(), name="gp_event_cal"),
+    path('gp_event_cal/',views.GpEventCalView.as_view(), name="gp_event_cal"),
 
 ]

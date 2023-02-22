@@ -40,9 +40,16 @@ class EventEditView(UpdateView):
     success_url = reverse_lazy('event')
 
     def get(self, request, **kwargs):
+        event_data = Event.objects.get(id=self.kwargs['pk'])
+        approved_data = Approved.objects.filter(
+            group = event_data.group)
+
+        names = [data.approved_user for data in approved_data] 
         #スタッフユーザーで無ければHTMLを返す　遷移させる
         if not request.user.is_staff:
             return HttpResponse('<h1>%sさんはアクセスできませぬ</h1>' % request.user.nickname)
+        elif not request.user in names:
+            return HttpResponse('<h1>%sさんは%sのMemberではありませぬ</h1>' % (request.user.nickname, event_data.group ))
         return super().get(request)
 
 class GroupEditView(UpdateView):
@@ -52,9 +59,16 @@ class GroupEditView(UpdateView):
     success_url = reverse_lazy('group')
 
     def get(self, request, **kwargs):
+        group_data = Group.objects.get(id=self.kwargs['pk'])
+        approved_data = Approved.objects.filter(
+            group = group_data)
+
+        names = [data.approved_user for data in approved_data] 
         #スタッフユーザーで無ければHTMLを返す　遷移させる
         if not request.user.is_staff:
             return HttpResponse('<h1>%sさんはアクセスできませぬ</h1>' % request.user.nickname)
+        elif not request.user in names:
+            return HttpResponse('<h1>%sさんは%sのMemberではありませぬ</h1>' % (request.user.nickname, group_data.group_name ))
         return super().get(request)
 
 class GroupDetailView(View):
@@ -92,4 +106,18 @@ class EventCalView(mixins.MonthCalendarMixin, generic.TemplateView):
         
         return context
 
-# event_data = Event.objects.order_by('-id') #新しいものから順番に並べる
+class GpEventCalView(mixins.MonthCalendarMixin, generic.TemplateView):
+    template_name = 'reservation/group_event_cal.html'
+    model = Event
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        calendar_context = self.get_month_calendar()
+        try:
+            approved = Approved.objects.get(approved_user=self.request.user)
+            event_data = Event.objects.filter(group=approved.group).order_by('-id') #イベントのデータを読み出し
+        except:
+            event_data = []
+        context.update(calendar_context)
+        context['event_data'] = event_data #イベントのデータをコンテキストで渡す
+        
+        return context
