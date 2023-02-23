@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     "sch_calendar",
     "full_calendar",
 
+
 ]
 
 CRISPY_TEMPLATE_PACK = 'bootstrap4'

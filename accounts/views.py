@@ -4,6 +4,8 @@ from allauth.account import views
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.views.generic import CreateView, DetailView, UpdateView, TemplateView
 from django.urls import reverse_lazy, reverse
+from reservation.models import *
+from django.http import HttpResponse
 
 from accounts.models import CustomUser
 from .forms import ProfileForm
@@ -18,9 +20,26 @@ class OnlyYouMixin(UserPassesTestMixin):
         return user.pk == self.kwargs['pk'] or user.is_superuser
 
 #Profile内容確認用view
+# class ProfileView(OnlyYouMixin, DetailView):
+#     model = CustomUser
+#     template_name = 'account/profile.html'
+
+
+
 class ProfileView(OnlyYouMixin, DetailView):
     model = CustomUser
     template_name = 'account/profile.html'
+
+    def get(self, request, *args, **kwargs):
+        user_data = CustomUser.objects.get(email=self.request.user)
+        group_data_m = ApprovedMember.objects.filter(member=user_data, approved=True)
+        group_data_s = ApprovedStaff.objects.filter(staff=user_data, approved=True)
+        return render(request, self.template_name,{
+            'group_data_m':group_data_m,
+            'group_data_s':group_data_s,
+            'user_data':user_data,
+        })
+
 
 class ProfileEditView(OnlyYouMixin, UpdateView):
     model = CustomUser

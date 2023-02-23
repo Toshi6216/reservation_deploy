@@ -13,8 +13,8 @@
                     <h5 class="card-title">#{{ group_data.pk }}/{{ group_data.group_name }}</h5>
                     <p class="card-text">{{ group_data.group_detail }}</p>
                     
-                    {% for data in approved_data %}
-                    {{ data.approved_user }}
+                    {% for data in member_data %}
+                    {{ data.approved_member }} &ensp;
                     {% endfor %}
                 </div>
                 {% if user.is_staff %}

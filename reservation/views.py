@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from django.views.generic import TemplateView, View, UpdateView
-from .models import Group, Event, Approved, Applying
+from .models import Group, Event, ApprovedMember, ApprovedStaff, ApplyingMember, ApplyingStaff
 from .forms import EventForm, GroupForm
 from accounts.models import CustomUser
 from django.urls import reverse_lazy
@@ -12,6 +12,8 @@ import json
 from django.middleware.csrf import get_token
 from django.views import generic
 from . import mixins
+import datetime
+# from dateutil.relativedelta import relativedelta 
 
 class IndexView(TemplateView):
     template_name = 'reservation/index.html'
@@ -41,15 +43,15 @@ class EventEditView(UpdateView):
 
     def get(self, request, **kwargs):
         event_data = Event.objects.get(id=self.kwargs['pk'])
-        approved_data = Approved.objects.filter(
-            group = event_data.group)
+        staff_data = ApprovedStaff.objects.filter(
+            group = event_data.group, approved=True)
 
-        names = [data.approved_user for data in approved_data] 
+        names = [data.staff for data in staff_data] 
         #スタッフユーザーで無ければHTMLを返す　遷移させる
-        if not request.user.is_staff:
-            return HttpResponse('<h1>%sさんはアクセスできませぬ</h1>' % request.user.nickname)
-        elif not request.user in names:
-            return HttpResponse('<h1>%sさんは%sのMemberではありませぬ</h1>' % (request.user.nickname, event_data.group ))
+        # if not request.user.is_staff:
+        #     return HttpResponse('<h1>%sさんはアクセスできませぬ</h1>' % request.user.nickname)
+        if not request.user in names:
+            return HttpResponse('<h1>%sさんは%sの編集権限がありませぬ</h1>' % (request.user.nickname, event_data.group ))
         return super().get(request)
 
 class GroupEditView(UpdateView):
@@ -60,25 +62,36 @@ class GroupEditView(UpdateView):
 
     def get(self, request, **kwargs):
         group_data = Group.objects.get(id=self.kwargs['pk'])
-        approved_data = Approved.objects.filter(
-            group = group_data)
+        staff_data = ApprovedStaff.objects.filter(
+            group = group_data, approved = True)
 
-        names = [data.approved_user for data in approved_data] 
+        names = [data.staff for data in staff_data] 
         #スタッフユーザーで無ければHTMLを返す　遷移させる
-        if not request.user.is_staff:
-            return HttpResponse('<h1>%sさんはアクセスできませぬ</h1>' % request.user.nickname)
-        elif not request.user in names:
+        if not request.user in names:
             return HttpResponse('<h1>%sさんは%sのMemberではありませぬ</h1>' % (request.user.nickname, group_data.group_name ))
         return super().get(request)
+
+    # def get(self, request, **kwargs):
+    #     group_data = Group.objects.get(id=self.kwargs['pk'])
+    #     member_data = ApprovedMember.objects.filter(
+    #         group = group_data, approved = True)
+
+    #     names = [data.member for data in member_data] 
+    #     #スタッフユーザーで無ければHTMLを返す　遷移させる
+    #     if not request.user in names:
+    #         return HttpResponse('<h1>%sさんは%sのMemberではありませぬ</h1>' % (request.user.nickname, group_data.group_name ))
+    #     return super().get(request)
 
 class GroupDetailView(View):
     def get(self, request, *args, **kwargs):
         group_data = Group.objects.get(id=self.kwargs['pk'])
-        approved_data = Approved.objects.filter(
-            group = group_data)
+        member_data = ApprovedMember.objects.filter(
+            group = group_data, approved = True)
+        # for n in member_data:
+        #     print(n.member)
 
-        names = [data.approved_user for data in approved_data] 
-        """グループ加入の承認済みデータのリストに名前が入っていないと別ページにリダイレクトされる"""
+        names = [data.member for data in member_data] 
+        """グループ加入の承認済みデータのリストに名前があり、かつapprovedでないと別ページにリダイレクトされる"""
         # print(f"approved_data: {approved_data}")
         # print(type(approved_data))
         # print(f"names:{names}")
@@ -89,7 +102,7 @@ class GroupDetailView(View):
 
         return render(request, 'reservation/group_detail.html',{
             'group_data':group_data,
-            'approved_data':approved_data,
+            'member_data':member_data,
         })
 
 
@@ -112,12 +125,13 @@ class GpEventCalView(mixins.MonthCalendarMixin, generic.TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         calendar_context = self.get_month_calendar()
-        try:
-            approved = Approved.objects.get(approved_user=self.request.user)
-            event_data = Event.objects.filter(group=approved.group).order_by('-id') #イベントのデータを読み出し
-        except:
-            event_data = []
+
+        approved_check = ApprovedMember.objects.filter(member=self.request.user, approved = True)
+        chk=[ap_chk.group for ap_chk in approved_check]
+        event_data = Event.objects.filter(group__in=chk).order_by('event_date')#所属しているグループのイベントでフィルター
+
         context.update(calendar_context)
         context['event_data'] = event_data #イベントのデータをコンテキストで渡す
-        
+        context['approved_check'] = approved_check
+
         return context

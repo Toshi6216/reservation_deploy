@@ -4,7 +4,7 @@ import datetime
 
 class BaseCalendarMixin:
     """カレンダー関連Mixinの基底クラス"""
-    first_weekday = 0 #0は月曜から 1は火曜から
+    first_weekday = -1 #0は月曜から 1は火曜から
     week_names = ["月", "火", "水", "木", "金", "土", "日"]
 
     def setup_calendar(self):

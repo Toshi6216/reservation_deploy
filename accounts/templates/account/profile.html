@@ -18,9 +18,25 @@
                         <th class="header">ニックネーム</th>
                         <td class="data">{{ user.nickname }}</td>
                     </tr>
-                    <tr>
+                    {% comment %} <tr>
                         <th class="header">staff</th>
                         <td class="data">{{ user.staff }}</td>
+                    </tr>
+                    <tr> {% endcomment %}
+                        <th class="header">所属(member)</th>
+                        <td class="data">
+                        {% for group_m in group_data_m %}
+                            {{ group_m.group }}
+                        {% endfor %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th class="header">所属(staff)</th>
+                        <td class="data">
+                        {% for group_s in group_data_s %}
+                            {{ group_s.group }}
+                        {% endfor %}
+                        </td>
                     </tr>
                 </tbody>
             </table>
