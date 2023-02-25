@@ -1,7 +1,7 @@
 {% extends 'reservation/base.html' %}
 
 {% block content %}
-<h1>今月の予定</h1>
+<h1>イベントカレンダー</h1>
 <div class="row my-4 ">
     <div class="col-md-8">
 
@@ -29,6 +29,10 @@
                                 {% if now == day %}
                                     <td class="table-success rsv_day  rs_{{day }}"  style="width:80px;"><!--今日のマスを緑にする-->
                                     <div hidden class="date_hide active">{{day}}</div>
+                                {% elif day in days %}
+                                    <td class="table-warning rsv_day rs_{{day }}"  style="width:80px;" >
+                                    <div hidden class="date_hide active">{{day}}</div>
+
                                 {% else %}
                                     <td class="rsv_day rs_{{day }}"  style="width:80px;" >
                                     <div hidden class="date_hide active">{{day}}</div>
@@ -59,7 +63,7 @@
             {% endif %}
                 <div class="card-body ">
                 
-                    <h5 class="card-title">#{{ event.id }}/{{ event.event_title }} {{event.event_date}}</h5>
+                    <h5 class="card-title">#{{ event.id }}/{{ event.event_title }} <div class="date_class">{{event.event_date}}</div></h5>
                     <p>{{ event.start_time }}-{{ event.end_time }}</p>
                     <p class="card-text ">{{ event.event_detail|truncatechars:100 }}</p>
                     <p ><a href="{% url 'group_detail'  event.group.pk  %} " class="">{{ event.group }}</a></p>

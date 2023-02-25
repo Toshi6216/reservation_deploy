@@ -44,17 +44,22 @@
             <li class="nav-item">
                 <a class="nav-link" href="{% url 'profile' user.pk %}">Profile<span class="sr-only"></span></a>
             </li>
-            <li class="nav-item">
-                <a class="nav-link" href="{% url 'account_logout' %}">ログアウト <span class="sr-only"></span></a>
-            </li>
+            
             <li class="nav-item">
                 <a class="nav-link" href="{% url 'gp_event_cal' %}">グループイベント <span class="sr-only"></span></a>
             </li>
             <li class="nav-item">
                 <a class="nav-link" href="{% url 'event' %}">イベント <span class="sr-only"></span></a>
             </li>
+            
             <li class="nav-item">
                 <a class="nav-link" href="{% url 'group' %}">グループ <span class="sr-only"></span></a>
+            </li>
+            <li>
+            <p>\t\t</p>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'account_logout' %}">ログアウト <span class="sr-only"></span></a>
             </li>
 
 

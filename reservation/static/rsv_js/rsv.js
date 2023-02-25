@@ -8,6 +8,7 @@
 
 $(function(){
   $('.event_card').addClass('event_hide');
+  
   // $('.event_card').find('').addClass("activate_event");
   $('td').on('click',
   function(){

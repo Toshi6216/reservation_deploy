@@ -13,13 +13,19 @@
                     <h5 class="card-title">#{{ group_data.pk }}/{{ group_data.group_name }}</h5>
                     <p class="card-text">{{ group_data.group_detail }}</p>
                     
-                    {% for data in member_data %}
-                    {{ data.approved_member }} &ensp;
+                    {% for m_name in member_names %}
+                    {{m_name.name}} &ensp;
                     {% endfor %}
+                    {% comment %} {% for data in member_data %}
+                    {{ data.approved_member }} &ensp;
+                    {% endfor %} {% endcomment %}
                 </div>
-                {% if user.is_staff %}
+                
                     <a href="{% url 'group_edit' group_data.pk  %} " class="nav-link">group編集</a>
-                {% endif %}
+                
+                {% comment %} {% if user.is_staff %}
+                    <a href="{% url 'group_edit' group_data.pk  %} " class="nav-link">group編集</a>
+                {% endif %} {% endcomment %}
             </div>
             
         </div>
