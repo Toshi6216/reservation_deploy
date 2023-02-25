@@ -9,7 +9,7 @@ body {
     display: flex;
     flex-flow: column;
     min-height: 100vh;
-}
+} 
 
 main {
     flex: 1;
@@ -52,3 +52,13 @@ main {
     padding: 16px 24px;
 }
 
+.active_css {
+    background-color: #d9ffb6;
+} 
+
+.event_hide {
+    display: none;
+}
+.active_event {
+    display: block;
+}
