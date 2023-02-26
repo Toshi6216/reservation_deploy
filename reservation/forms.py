@@ -4,12 +4,15 @@ from .models import *
 class EventForm(forms.ModelForm):
     class Meta:
         model = Event
-        fields = '__all__'
-        # fields = (
-        #     "event_title", 
-        #     "event_detail",
+        # fields = '__all__'
+        fields = (
+            "event_title", 
+            "event_detail",
+            "event_date",
+            "start_time",
+            "end_time",
     
-        #     )
+            )
 
         
 class GroupForm(forms.ModelForm):

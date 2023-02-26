@@ -10,18 +10,26 @@
 
             <div class="col-md-8">
                 <div class="card-body">
-                    <h5 class="card-title">#{{ group_data.pk }}/{{ group_data.group_name }}</h5>
-                    <p class="card-text">{{ group_data.group_detail }}</p>
-                    
-                    {% for m_name in member_names %}
-                    {{m_name.name}} &ensp;
-                    {% endfor %}
-                    {% comment %} {% for data in member_data %}
-                    {{ data.approved_member }} &ensp;
-                    {% endfor %} {% endcomment %}
+                    <h4 class="card-title mb-3"><div hidden>#{{ group_data.pk }}</div>{{ group_data.group_name }}</h4>
+                    <p class="card-text mb-3">{{ group_data.group_detail }}</p>
+                    <ul class="list-group listgroup-flush mb-3">
+                        <li class="list-group-item">
+                        <p>【STAFF】</p>
+                            {% for s_name in staff_names %}
+                            {{s_name.nickname}} &ensp;
+                            {% endfor %}
+                        </li>
+                        <li class="list-group-item">
+                        <p>【MEMBER】</p>
+                            {% for m_name in member_names %}
+                            {{ m_name.nickname }} &ensp;
+                            {% endfor %} 
+                        </li>
+                    </ul>
+                        <a href="{% url 'group_edit' group_data.pk  %} " class="btn btn-warning mb-3">group編集</a>
                 </div>
                 
-                    <a href="{% url 'group_edit' group_data.pk  %} " class="nav-link">group編集</a>
+                    
                 
                 {% comment %} {% if user.is_staff %}
                     <a href="{% url 'group_edit' group_data.pk  %} " class="nav-link">group編集</a>
@@ -30,5 +38,23 @@
             
         </div>
     </div>
+
+    {% for event in event_data %}
+ 
+            <div class="card">
+          
+                <div class="card-body">
+                
+                    <h5 class="card-title">#{{ event.id }}/{{ event.event_title }}</h5>
+                    <p class="card-text">{{ event.event_detail|truncatechars:100 }}</p>
+                    <p ><a href="{% url 'group_detail'  event.group.pk  %} " class="nav-link">{{ event.group }}</a></p>
+                    {% if user.is_staff %}
+                        <a href="{% url 'event_edit' event.pk  %} " class="btn btn-warning">event編集</a>
+                    {% endif %}
+                </div>
+
+        
+            </div>  
+        {% endfor %}
 
 {% endblock %}

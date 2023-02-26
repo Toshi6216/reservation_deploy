@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from django.views.generic import TemplateView, View, UpdateView
+from django.views.generic import TemplateView, View, UpdateView, CreateView
 from .models import Group, Event, ApprovedMember, ApprovedStaff, ApplyingMember, ApplyingStaff
 from .forms import EventForm, GroupForm
 from accounts.models import CustomUser
@@ -13,12 +13,15 @@ from django.middleware.csrf import get_token
 from django.views import generic
 from . import mixins
 import datetime
+from django.contrib.auth.mixins import LoginRequiredMixin
+
 # from dateutil.relativedelta import relativedelta 
 
+#homeページ
 class IndexView(TemplateView):
     template_name = 'reservation/index.html'
     
-
+#イベント一覧
 class EventView(View):
     #このviewがコールされたら最初にget関数が呼ばれる
     def get(self, request, *args, **kwargs):
@@ -27,6 +30,7 @@ class EventView(View):
             'event_data': event_data
         })
 
+#グループ一覧
 class GroupView(View):
     #このviewがコールされたら最初にget関数が呼ばれる
     def get(self, request, *args, **kwargs):
@@ -35,6 +39,7 @@ class GroupView(View):
             'group_data': group_data
         })
 
+#イベント編集
 class EventEditView(UpdateView):
     model = Event
     template_name = 'reservation/event_form.html'
@@ -48,12 +53,12 @@ class EventEditView(UpdateView):
 
         names = [data.staff for data in staff_data] 
         #スタッフユーザーで無ければHTMLを返す　遷移させる
-        # if not request.user.is_staff:
-        #     return HttpResponse('<h1>%sさんはアクセスできませぬ</h1>' % request.user.nickname)
         if not request.user in names:
             return HttpResponse('<h1>%sさんは%sの編集権限がありませぬ</h1>' % (request.user.nickname, event_data.group ))
         return super().get(request)
 
+
+#グループ内容編集
 class GroupEditView(UpdateView):
     model = Group
     template_name = 'reservation/group_form.html'
@@ -71,17 +76,7 @@ class GroupEditView(UpdateView):
             return HttpResponse('<h1>%sさんは%sの編集権限がありませぬ</h1>' % (request.user.nickname, group_data.group_name ))
         return super().get(request)
 
-    # def get(self, request, **kwargs):
-    #     group_data = Group.objects.get(id=self.kwargs['pk'])
-    #     member_data = ApprovedMember.objects.filter(
-    #         group = group_data, approved = True)
-
-    #     names = [data.member for data in member_data] 
-    #     #スタッフユーザーで無ければHTMLを返す　遷移させる
-    #     if not request.user in names:
-    #         return HttpResponse('<h1>%sさんは%sのMemberではありませぬ</h1>' % (request.user.nickname, group_data.group_name ))
-    #     return super().get(request)
-
+#グループ詳細
 class GroupDetailView(View):
     def get(self, request, *args, **kwargs):
         group_data = Group.objects.get(id=self.kwargs['pk'])
@@ -101,14 +96,12 @@ class GroupDetailView(View):
         member_names = {m_data.member for m_data in member_data}
         staff_names = {s_data.staff for s_data in staff_data}
         """グループ加入の承認済みデータのリストに名前があり、かつapprovedでないと別ページにリダイレクトされる"""
-        # print(f"approved_data: {approved_data}")
-        # print(type(approved_data))
+
         print(f"member_names:{member_names}")
         print(request.user in member_names)
         print(f"staff_names:{staff_names}")
         print(request.user in staff_names)
-        # print(f"request.user:{request.user}")
-        # print(request.user in names)
+
         if (request.user in staff_names) or  (request.user in member_names):
             return render(request, 'reservation/group_detail.html',{
                 'group_data':group_data,
@@ -118,12 +111,9 @@ class GroupDetailView(View):
             })
         else:
             return HttpResponse('<h1>%sさんは%sの詳細は見られません</h1>' % (request.user.nickname, group_data.group_name ))
-       
-
-        
 
 
-
+#カレンダーと全てのイベントを表示
 class EventCalView(mixins.MonthCalendarMixin, generic.TemplateView):
     template_name = 'reservation/event_cal.html'
     model = Event
@@ -136,6 +126,7 @@ class EventCalView(mixins.MonthCalendarMixin, generic.TemplateView):
         
         return context
 
+#カレンダーと所属しているグループのイベントを表示
 class GpEventCalView(mixins.MonthCalendarMixin, generic.TemplateView):
     template_name = 'reservation/group_event_cal.html'
     model = Event
@@ -154,3 +145,24 @@ class GpEventCalView(mixins.MonthCalendarMixin, generic.TemplateView):
         context['days'] = days
 
         return context
+    
+#イベント登録
+class EventCreateView(LoginRequiredMixin, CreateView):
+    #グループに所属していないとイベントは作れない
+    
+    pass
+
+#グループ登録
+class GroupCreateView(LoginRequiredMixin, CreateView):
+    #誰でもグループを作れる
+    #グループを作った本人は自動的にstaff,member権限付与
+
+    pass
+
+#１つのグループが行うイベントカレンダー イベント参加ボタン
+class GroupCalendar(GpEventCalView):
+    pass
+
+#イベント詳細
+class EventDetailView():
+    pass

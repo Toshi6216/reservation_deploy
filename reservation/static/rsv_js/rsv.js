@@ -31,6 +31,14 @@ $(function(){
   },
 
   );
+  
+  $(window).scroll(function () {
+    if($(window).scrollTop() > 20) {
+      $('nav').addClass('sticky-top');
+    } else {
+      $('nav').removeClass('sticky-top');
+    }
+  });
 });
 // クリックした日付のクラス
   

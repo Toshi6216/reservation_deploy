@@ -81,3 +81,16 @@ class ApplyingStaff(models.Model):
                 name = "appliyng_staff_unique"
             ),
         ]
+
+
+class Join(models.Model):
+    join_name = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    join_event = models.ForeignKey(Event, on_delete=models.CASCADE)
+    join = models.BooleanField(default=False)
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["join_name","join_event"],
+                name = "join_unique"
+            ),
+        ]
