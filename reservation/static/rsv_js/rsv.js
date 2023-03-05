@@ -1,15 +1,5 @@
-// document.getElementById("button").onclick = function() {
-//     // ここに#buttonをクリックしたら発生させる処理を記述する
-//     $('.day').click(function(){
-//         $(this).css('background-color', '#ffb6c1');
-//     });
-
-//   };
-
 $(function(){
-  $('.event_card').addClass('event_hide');
-  
-  // $('.event_card').find('').addClass("activate_event");
+    
   $('td').on('click',
   function(){
     // $(this).css('background-color', '#ffb6c1');

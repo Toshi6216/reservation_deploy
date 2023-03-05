@@ -8,8 +8,8 @@
             <a class="btn btn-warning" href="{% url 'gp_event_cal' %}">今月</a>
             <a class="btn btn-primary" href="{% url 'gp_event_cal' month_previous.year month_previous.month %}">前月</a>
         
-            {{ month_current | date:"Y年m月" }}
             <a class="btn btn-primary" href="{% url 'gp_event_cal' month_next.year month_next.month %}">次月</a>
+            <h3>{{ month_current | date:"Y年m月" }}</h3>
 
         <div class="card border-info">
                 {% comment %} <table class="table border-dark " style="table-layout:fixed;"> {% endcomment %}
@@ -31,7 +31,7 @@
                                     <div hidden class="date_hide active">{{day}}</div>
                                 {% elif day in days %}
                                     <td class="table-warning rsv_day rs_{{day }}"  style="width:80px;" >
-                                    <div hidden class="date_hide active">{{day}}</div>
+                                    <div hidden class="date_hide active">{{day}}</div><!--text検索できるように非表示で日付を入れておく-->
 
                                 {% else %}
                                     <td class="rsv_day rs_{{day }}"  style="width:80px;" >
@@ -57,9 +57,9 @@
 
         {% for event in event_data %}
             {% if now == event.event_date %}
-            <div class="card border-info event_card {{event.event_date}}">
+            <div class="active_event card border-info event_card {{event.event_date}}">
             {% else %}
-            <div class="card border-info event_card {{event.event_date}}">
+            <div class="event_hide card border-info event_card {{event.event_date}}">
             {% endif %}
                 <div class="card-body ">
                 
@@ -81,7 +81,7 @@
         <div class="col-md-4">
   
             <div class="card">
-            <h5 class="card-header">group menber</h5>
+            <h5 class="card-header">group menber...</h5>
             </div>
         </div>
 

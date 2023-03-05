@@ -1,5 +1,5 @@
 {% extends 'reservation/base.html' %}
-
+{% load widget_tweaks %}
 {% block content %}
 
 <div class="my-4">
@@ -9,7 +9,6 @@
     {% csrf_token %}
     
     {{ form.as_p }}
-    
 
 
     <button class="btn btn-warning" type="submit">登録する</button>

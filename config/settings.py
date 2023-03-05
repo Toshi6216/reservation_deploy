@@ -47,7 +47,7 @@ INSTALLED_APPS = [
     "crispy_forms",#crispy_formは、フォームに対して自動でBootstrapクラスを適用してくれるモジュール
     "sch_calendar",
     "full_calendar",
-
+    'widget_tweaks',
 
 ]
 

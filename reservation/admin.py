@@ -16,9 +16,13 @@ class ApprovedMemberAdmin(admin.ModelAdmin):
 class ApprovedStaffAdmin(admin.ModelAdmin):
     list_display = ('staff', 'group', 'approved',)
 
+class JoinAdmin(admin.ModelAdmin):
+    list_display = ('join_name', 'join_event', 'join')
+
 admin.site.register(Group)
 admin.site.register(Event, EventAdmin)
 admin.site.register(ApplyingMember, ApplyingMemberAdmin)
 admin.site.register(ApplyingStaff, ApplyingStaffAdmin)
 admin.site.register(ApprovedMember, ApprovedMemberAdmin)
 admin.site.register(ApprovedStaff, ApprovedStaffAdmin)
+admin.site.register(Join, JoinAdmin)

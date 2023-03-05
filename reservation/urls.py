@@ -13,8 +13,9 @@ urlpatterns = [
     path('event_cal/<int:year>/<int:month>/',views.EventCalView.as_view(), name="event_cal"),
     path('gp_event_cal/<int:year>/<int:month>/',views.GpEventCalView.as_view(), name="gp_event_cal"),
     path('gp_event_cal/',views.GpEventCalView.as_view(), name="gp_event_cal"),
-    path('event/new/', views.EventCreateView.as_view(), name='event_new'),
+    path('group_detail/<int:pk>/event_new/', views.EventCreateView.as_view(), name='event_new'),
     path('group/new/', views.GroupCreateView.as_view(), name='group_new'),
+    path('group/signal/', views.groupSignal, name='group_signal'),
 
 
 ]

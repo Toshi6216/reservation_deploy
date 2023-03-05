@@ -12,12 +12,12 @@
                 <div class="card-body">
                     <h5 class="card-title">#{{ group.id }}/{{ group.group_name }}</h5>
                     <p class="card-text">{{ group.group_detail|truncatechars:100 }}</p>
+                <p class=""><a href="{% url 'group_detail' group.pk  %} " class="btn btn-success">group詳細</a></p>
+                {% if True %}<!--staffでなければ表示しない-->
+                <p><a href="{% url 'group_edit' group.pk  %} " class="btn btn-warning">group編集</a></p>
+                {% endif %}
                 </div>
-                <p><a href="{% url 'group_detail' group.pk  %} " class="nav-link">group詳細</a></p>
-                <p><a href="{% url 'group_edit' group.pk  %} " class="nav-link">group編集</a></p>
-                {% comment %} {% if user.is_staff %}
-                    <a href="{% url 'group_edit' group.pk  %} " class="nav-link">group編集</a>
-                {% endif %} {% endcomment %}
+
             </div>
             
         </div>
