@@ -5,16 +5,33 @@
 <div class="my-4">
     <h2>Event Form</h2>
 </div>
-<form method="post" enctype="multipart/form-data" autocomplete="off">
-    {% csrf_token %}
-    {{ form.as_p }}    
-    {% comment %} {{ form.event_title }} 
-    {{ form.event_detail }}
-    {{ form.event_date }}
-    {{ form.start_time }}
-    {{ form.end_time }} {% endcomment %}
+<form method="post" enctype="multipart/form-data" autocomplete="off"> 
 
-    
+    {% csrf_token %}
+    {% comment %} {{ form.as_p }} {% endcomment %}
+
+    <div class="form-group my-2">
+    タイトル：{{ form.event_title }} 
+    </div>
+    <div class="form-group my-2">
+    説明：{{ form.event_detail }}
+    </div>
+    <div class="form-group my-2">
+    日にち：{{ form.event_date }}
+    </div>
+    {% comment %} 
+    <div class="form-group">
+    {{ form.start_time }}
+    </div>
+    {{ form.end_time }} 
+    {% endcomment %}
+    <div class="form-group my-2">
+    開始：{{ form.start_hour }}:{{ form.start_minute }}
+    </div>
+    <div class="form-group my-2">
+    終了：{{ form.end_hour }}:{{ form.end_minute }}
+    </div>
+
     <button class="btn btn-warning" type="submit">登録する</button>
 </form>
 {% endblock %}
@@ -39,6 +56,6 @@
       
 
     } );
-  </script>
+  </script> 
   
     {% endblock %}

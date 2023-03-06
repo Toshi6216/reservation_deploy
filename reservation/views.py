@@ -174,6 +174,7 @@ class EventCreateView(LoginRequiredMixin, CreateView):
     form_class = EventForm
     success_url = reverse_lazy('group_detail')
 
+
     def get(self, request, **kwargs):
         group_data = Group.objects.get(id=self.kwargs['pk'])
         print(group_data)
@@ -191,10 +192,19 @@ class EventCreateView(LoginRequiredMixin, CreateView):
         return reverse('group_detail', kwargs={'pk':pk})
     
     def form_valid(self, form):
+        print(form)
+        start_hour = form.cleaned_data.get('start_hour')
+        start_minute = form.cleaned_data.get('start_minute')
+        end_hour = form.cleaned_data.get('end_hour')
+        end_minute = form.cleaned_data.get('end_minute')
         obj = form.save(commit=False)
         obj.group = Group.objects.get(id=self.kwargs['pk'])
+        
+        obj.start_time = '{}:{}'.format(start_hour, start_minute)
+        obj.end_time = '{}:{}'.format(end_hour, end_minute)
         obj.save()
         return super().form_valid(form)
+    
 
 #グループ登録
 class GroupCreateView(LoginRequiredMixin, CreateView):
