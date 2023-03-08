@@ -17,6 +17,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models.signals import post_save 
 from django.dispatch import receiver
 from django.urls import reverse
+from django.core.exceptions import ValidationError
 
 # from dateutil.relativedelta import relativedelta 
 
@@ -192,16 +193,14 @@ class EventCreateView(LoginRequiredMixin, CreateView):
         return reverse('group_detail', kwargs={'pk':pk})
     
     def form_valid(self, form):
-        print(form)
-        start_hour = form.cleaned_data.get('start_hour')
-        start_minute = form.cleaned_data.get('start_minute')
-        end_hour = form.cleaned_data.get('end_hour')
-        end_minute = form.cleaned_data.get('end_minute')
+        start_time = form.cleaned_data["start_time"]
+        end_time = form.cleaned_data["end_time"]
+        if start_time and end_time and start_time >= end_time: #開始時刻と終了時刻のバリデーション
+            form.add_error('start_time', "開始時刻と終了時刻を確認してください")
+            return self.form_invalid(form)
         obj = form.save(commit=False)
         obj.group = Group.objects.get(id=self.kwargs['pk'])
         
-        obj.start_time = '{}:{}'.format(start_hour, start_minute)
-        obj.end_time = '{}:{}'.format(end_hour, end_minute)
         obj.save()
         return super().form_valid(form)
     

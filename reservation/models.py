@@ -1,5 +1,6 @@
 from django.db import models
 from accounts.models import CustomUser, StaffUser, MemberUser
+from django.core.exceptions import ValidationError
 
 
 class Group(models.Model):
@@ -35,7 +36,8 @@ class Event(models.Model):
 
     def __str__(self):
         return self.event_title
-
+    
+    
 #グループへ加入承認済(member)
 class ApprovedMember(models.Model):
     member = models.ForeignKey(CustomUser,  on_delete=models.CASCADE)
