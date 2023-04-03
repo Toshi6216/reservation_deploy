@@ -208,7 +208,7 @@ class EventCreateView(LoginRequiredMixin, CreateView):
 #グループ登録
 class GroupCreateView(LoginRequiredMixin, CreateView):
     #誰でもグループを作れる
-    #グループを作った本人は自動的にstaff,member権限付与
+    #グループを作った本人は自動的にstaff権限付与
 
     model = Group
     template_name = 'reservation/group_form.html'
@@ -221,13 +221,12 @@ class GroupCreateView(LoginRequiredMixin, CreateView):
         obj.save()
         return super().form_valid(form)
     
-@receiver(post_save, sender=Group)
+@receiver(post_save, sender=Group) #グループ登録時、同時にApprovedStaffにも登録される
 def groupSignal(sender, instance, created, **kwargs):
     if created:
         user = instance.group_owner
         ApprovedStaff.objects.create(staff=user, group=instance, approved=True)
-# post_save.connect(groupSignal, sender=Group)
-
+   
 
 
 #１つのグループが行うイベントカレンダー イベント参加ボタン
