@@ -34,17 +34,38 @@ class EventView(View):
             'event_data': event_data
         })
                 # 'is_group_staff':is_group_staff
+
+    
     
 
 #グループ一覧
 class GroupView(View):
     #このviewがコールされたら最初にget関数が呼ばれる
-    def get(self, request, *args, **kwargs):
+     def get(self, request, *args, **kwargs):
         group_data = Group.objects.order_by('-id') #新しいものから順番に並べる
 
         return render(request, 'reservation/group_index.html',{
             'group_data': group_data
         })
+     
+    # def get(self, request, *args, **kwargs):
+    #     # group_data = Group.objects.order_by('-id') #新しいものから順番に並べる
+    #     approved_check_m = ApprovedMember.objects.filter(member=self.request.user, approved = True)
+    #     approved_check_s = ApprovedStaff.objects.filter(staff=self.request.user, approved = True)
+    #     print(approved_check_m)
+    #     print(approved_check_s)
+    #     chk_m=[ap_chk_m.group for ap_chk_m in approved_check_m]
+    #     chk_s=[ap_chk_s.group for ap_chk_s in approved_check_s]
+    #     print(chk_m)
+    #     print(chk_s)
+    #     group_data = Group.objects.filter(Q(group_name__in=chk_m)|Q(group_name__in=chk_s))
+    #     print(group_data)
+    #     return render(request, 'reservation/group_index.html',{
+    #         'group_data': group_data
+
+    #     })
+    
+    
 
 #イベント編集
 class EventEditView(UpdateView):
