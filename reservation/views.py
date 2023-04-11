@@ -1,10 +1,10 @@
-from django.shortcuts import render
-from django.views.generic import TemplateView, View, UpdateView, CreateView
+from django.shortcuts import render, redirect, get_object_or_404
+from django.views.generic import TemplateView, View, UpdateView, CreateView, DeleteView, DetailView
 from .models import Group, Event, ApprovedMember, ApprovedStaff, ApplyingMember, ApplyingStaff
 from .forms import EventForm, GroupForm
 from accounts.models import CustomUser
 from django.urls import reverse_lazy
-from django.http import HttpResponse
+from django.http import HttpResponse,HttpResponseRedirect
 from django.template import loader
 from django.http import Http404
 import time
@@ -18,6 +18,8 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.urls import reverse
 from django.core.exceptions import ValidationError
+from django.contrib import messages
+from django.db import transaction
 
 # from dateutil.relativedelta import relativedelta 
 
@@ -34,38 +36,22 @@ class EventView(View):
             'event_data': event_data
         })
                 # 'is_group_staff':is_group_staff
-
-    
     
 
 #グループ一覧
 class GroupView(View):
     #このviewがコールされたら最初にget関数が呼ばれる
-     def get(self, request, *args, **kwargs):
+    def get(self, request, *args, **kwargs):
         group_data = Group.objects.order_by('-id') #新しいものから順番に並べる
+        for g in group_data:
+            print(g.group_owner.nickname)
+        user_data = CustomUser.objects.get(email=self.request.user)
 
         return render(request, 'reservation/group_index.html',{
-            'group_data': group_data
+            'group_data': group_data,
+            'user_data': user_data,
         })
-     
-    # def get(self, request, *args, **kwargs):
-    #     # group_data = Group.objects.order_by('-id') #新しいものから順番に並べる
-    #     approved_check_m = ApprovedMember.objects.filter(member=self.request.user, approved = True)
-    #     approved_check_s = ApprovedStaff.objects.filter(staff=self.request.user, approved = True)
-    #     print(approved_check_m)
-    #     print(approved_check_s)
-    #     chk_m=[ap_chk_m.group for ap_chk_m in approved_check_m]
-    #     chk_s=[ap_chk_s.group for ap_chk_s in approved_check_s]
-    #     print(chk_m)
-    #     print(chk_s)
-    #     group_data = Group.objects.filter(Q(group_name__in=chk_m)|Q(group_name__in=chk_s))
-    #     print(group_data)
-    #     return render(request, 'reservation/group_index.html',{
-    #         'group_data': group_data
 
-    #     })
-    
-    
 
 #イベント編集
 class EventEditView(UpdateView):
@@ -109,44 +95,203 @@ class GroupEditView(UpdateView):
         return super().get(request)
 
 #グループ詳細
-class GroupDetailView(View):
+# from django.views.generic.detail import DetailView
+
+# class GroupDetailView(DetailView):
+#     model = Group
+#     template_name = 'reservation/group_detail.html'
+#     context_object_name = 'group_data'
+
+#     def get_context_data(self, **kwargs):
+#         context = super().get_context_data(**kwargs)
+#         group_data = context['group_data']
+#         event_data = Event.objects.filter(group=group_data)
+
+#         member_data = group_data.approvedmember_set.filter(approved=True)
+#         staff_data = group_data.approvedstaff_set.filter(approved=True)
+
+#         member_names = {m.member for m in member_data}
+#         staff_names = {s.staff for s in staff_data}
+
+#         context['event_data'] = event_data
+#         context['member_data'] = member_data
+#         context['member_names'] = member_names
+#         context['staff_names'] = staff_names
+#         context['is_group_staff'] = self.request.user in staff_names
+
+#         if self.request.user not in staff_names and self.request.user not in member_names:
+#             context['error_message'] = f'{self.request.user.nickname}さんは{group_data.group_name}の詳細を閲覧できません。'
+
+#         return context
+
+# class GroupDetailView(View):
+class GroupDetailView(DetailView):
+
+    model=Group
+    template_name = 'reservation/group_detail.html'
+
     def get(self, request, *args, **kwargs):
+        print("getメソッド")
         group_data = Group.objects.get(id=self.kwargs['pk'])
         event_data = Event.objects.filter(group=group_data)
         member_data = ApprovedMember.objects.filter( #memberデータ取得
             group = group_data, approved = True)
-        print("--member--")
-        for n in member_data:
-            print(n.member)
-        print("------")
+        # print("--member--")
+        # for n in member_data:
+        #     print(n.member)
+        # print("------")
         staff_data = ApprovedStaff.objects.filter( #staffデータ取得
             group = group_data, approved = True)
-        print("--staff--")
-        for n in staff_data:
-            print(n.staff)
-        print("-------")
+        # print("--staff--")
+        # for n in staff_data:
+        #     print(n.staff)
+        # print("-------")
+        applying_staffs=ApplyingStaff.objects.filter(group=group_data, applying=True)
+        applying_members=ApplyingMember.objects.filter(group=group_data, applying=True)
+
 
         member_names = {m_data.member for m_data in member_data}
         staff_names = {s_data.staff for s_data in staff_data}
         """グループ加入の承認済みデータのリストに名前があり、かつapprovedでないと別ページにリダイレクトされる"""
         is_group_staff = self.request.user in staff_names
-        print("is_group_staff:",is_group_staff)
-        print(f"member_names:{member_names}")
-        print(request.user in member_names)
-        print(f"staff_names:{staff_names}")
-        print(request.user in staff_names)
+        # print("is_group_staff:",is_group_staff)
+        # print(f"member_names:{member_names}")
+        # print(request.user in member_names)
+        # print(f"staff_names:{staff_names}")
+        # print(request.user in staff_names)
 
-        if (request.user in staff_names) or  (request.user in member_names):
-            return render(request, 'reservation/group_detail.html',{
+        # print(group_data.applyingmember_set.all())
+        # for apy_m in group_data.applyingmember_set.all():
+        #     print(apy_m.member)
+        ctx={
                 'group_data':group_data,
                 'member_data':member_data,
                 'member_names':member_names,
                 'staff_names':staff_names,
                 'event_data':event_data,
-                'is_group_staff':is_group_staff
-            })
+                'is_group_staff':is_group_staff,
+                'applying_staffs':applying_staffs,
+                'applying_members':applying_members,
+
+            }
+
+        if (request.user in staff_names) or  (request.user in member_names):
+            return render(request, 'reservation/group_detail.html', ctx)
         else:
             return HttpResponse('<h1>%sさんは%sの詳細は見られません</h1>' % (request.user.nickname, group_data.group_name ))
+        #########################
+    def get_object(self):
+        return get_object_or_404(Group, pk=self.kwargs.get('pk'))
+    
+
+    def post(self, request, *args, **kwargs):
+        group = self.get_object()
+        pk= group.pk
+        self.object = self.get_object()
+
+        print(request.POST)
+        if 'applying_staff' in request.POST:
+            applying_staff_pks = request.POST.getlist('applying_staff')
+            # print(applying_staff_pks, applying_member_pks)
+
+            if not applying_staff_pks:
+                messages.error(request, '選択されたスタッフが存在しません。')
+                return redirect('group_detail', pk=pk)
+            
+            # print(applying_staff_pks)
+            applying_staff = ApplyingStaff.objects.filter(pk__in=applying_staff_pks, group=group, applying=True)
+
+            # print("applying_staff****")
+            # for s in applying_staff:
+            #     print(s)
+
+            if applying_staff.count() != len(applying_staff_pks):
+                messages.error(request, '不正なスタッフが含まれています。')
+                return redirect('group_detail', pk=pk)
+            else:
+                print("applying_staff count ok")
+            
+            staff_pks = applying_staff.values_list('staff', flat=True)
+
+            # print("staff_pks:", staff_pks)
+            # if 'applying_staff' in request.POST:
+            print('applying_staff')
+            try:
+                with transaction.atomic():
+                    
+                    # ApprovedStaffを更新/作成
+                    approved_staff_list = []
+                    for staff_pk in staff_pks:
+                        approved_staff, created = ApprovedStaff.objects.get_or_create(staff_id=staff_pk, group=group)
+                        approved_staff.approved = True
+                        approved_staff_list.append(approved_staff)
+                    # print("approved********")
+                    # for apd_s in approved_staff_list:
+                    #     print(apd_s)
+                    # # print(approved_staff_list)
+                    # print("Before bulk_update:", approved_staff_list[0].approved)  # ここでログを出力
+                    ApprovedStaff.objects.bulk_update(approved_staff_list, ['approved'])
+                    # print("After bulk_update:", approved_staff_list[0].approved)  # ここでログを出力
+
+                    # ApplyingStaffを更新
+                    # print("applying******")
+                    # for apl_s in applying_staff:
+                    #     print(apl_s)
+                    applying_staff.delete()
+
+                messages.success(request, 'スタッフを承認しました。')
+            except Exception as e:
+                messages.error(request, 'スタッフの承認に失敗しました。')
+                print(e)
+
+            return redirect('group_detail', pk=pk)
+        
+        elif 'applying_member' in request.POST:
+            applying_member_pks = request.POST.getlist('applying_member')
+
+            if not applying_member_pks:
+                messages.error(request, '選択されたメンバーが存在しません。')
+                return redirect('group_detail', pk=pk)
+            
+            # print(applying_member_pks)
+            applying_member = ApplyingMember.objects.filter(pk__in=applying_member_pks, group=group, applying=True)
+
+            print("applying_member****")
+            for s in applying_member:
+                print(s)
+
+            if applying_member.count() != len(applying_member_pks):
+                messages.error(request, '不正なメンバーが含まれています。')
+                return redirect('group_detail', pk=pk)
+            else:
+                print("applying_member count ok")
+
+
+            member_pks = applying_member.values_list('member', flat=True)
+
+            print('applying_member')
+            try:
+                with transaction.atomic():
+                    
+                    # ApprovedMemberを更新/作成
+                    approved_member_list = []
+                    for member_pk in member_pks:
+                        approved_member, created = ApprovedMember.objects.get_or_create(member_id=member_pk, group=group)
+                        approved_member.approved = True
+                        approved_member_list.append(approved_member)
+
+                    ApprovedMember.objects.bulk_update(approved_member_list, ['approved'])
+
+                    applying_member.delete()
+
+                messages.success(request, 'スタッフを承認しました。')
+            except Exception as e:
+                messages.error(request, 'スタッフの承認に失敗しました。')
+                print(e)
+
+            return redirect('group_detail', pk=pk)
+        
+        
 
 
 #カレンダーと全てのイベントを表示
@@ -225,6 +370,22 @@ class EventCreateView(LoginRequiredMixin, CreateView):
         obj.save()
         return super().form_valid(form)
     
+#イベント削除
+class EventDeleteView(View):
+
+    def get(self, request, *args, **kwargs):
+        event_data = Event.objects.get(id=self.kwargs['pk'])
+        return render(request, 'reservation/event_delete.html',{
+            'event_data': event_data
+        })
+
+    def post(self, request, *args, **kwargs):
+        event_data = Event.objects.get(id=self.kwargs['pk'])
+        pk = event_data.group.pk
+        print(pk)
+        event_data.delete()
+        #削除したイベントのグループページに遷移
+        return HttpResponseRedirect( reverse_lazy('group_detail', kwargs={'pk':pk}))
 
 #グループ登録
 class GroupCreateView(LoginRequiredMixin, CreateView):
