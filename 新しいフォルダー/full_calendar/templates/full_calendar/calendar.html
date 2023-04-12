@@ -1,0 +1,74 @@
+{% extends 'reservation/base.html' %}
+
+{% block content %}
+
+
+
+
+   <div class="container"> 
+        <div class="row my-4">
+            {% comment %} 
+            ---メインコンテンツ---
+             {% endcomment %}
+            <div class="col-md-8">
+            
+                <div id='calendar'></div>
+
+            </div>
+            {% comment %} 
+            ---サイドバー---
+             {% endcomment %}
+            <div class="col-md-4">
+                <div class="card">
+                    <h5 class="card-header">カテゴリ一覧</h5>
+                        {% comment %} {% if user.is_authenticated %}
+                            <a href="/" class="btn btn-primary m-2">カテゴリを追加</a>
+                        {% endif %} {% endcomment %}
+                    <div class="card-body">
+                        <div class="row">
+                        {% comment %} {% for category in category_data %}
+                                
+                                <a class="btn btn-info m-2" href="{% url 'category' category %}">
+                                {{ category.name }} </a>
+
+                        {% endfor %} {% endcomment %}
+                        </div>
+                        {% comment %} {% if user.is_authenticated %}
+                        <div class="text-center">
+                            <a href="{% url 'category_delete' %}" class="btn btn-danger m-2 ">カテゴリを削除</a>
+                        </div>
+                        {% endif %} {% endcomment %}
+                        
+                    </div>
+                </div>
+                <div class="card">
+                    <h5 class="card-header">最近投稿されたblogリスト</h5>
+                    <div class="card-body">
+                        {% comment %} {% for post in posts_data2 %}
+                            
+                                <a href="{% url 'post_detail' post.id %}"> {{ post.title }} </a>
+                                <p>{{ post.contentcard.content }}</p>
+                            
+                            <p class="">({{ post.created|date }})</p><br>
+
+                        {% endfor %} {% endcomment %}
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+{% endblock %}
+
+{% block extra_js %}
+    {% load static %}
+    <!--axiosのCDN-->
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <!--full calendarのCDN-->
+    <script src="
+    https://cdn.jsdelivr.net/npm/fullcalendar@6.1.4/index.global.min.js
+    "></script>
+    <script src="{% static 'js/app.js' %}"></script>
+
+{% endblock %}
