@@ -2,7 +2,7 @@
 
 {% block content %}
     <div class="my-5">
-        <h1>グループ加入申請</h1>
+        <h1>グループ加入申請({{ staff_or_member }})</h1>
     </div>
 
     <div class="card mb-3 col-lg-auto" style="">
@@ -20,8 +20,8 @@
                         <li class="list-group-item">
                         <form action="" method="POST">
                         {% csrf_token %}
-                            <p>このグループにメンバーとして加入申請しますか？</p>
-                            <p><button type="submit" class="btn btn-primary">加入申請</button></p>
+                            <p>このグループに{{ staff_or_member }}として加入申請しますか？</p>
+                            <p><button type="submit" name="member" class="btn btn-primary">加入申請</button></p>
                         </form>
                         </li>
                     </ul>

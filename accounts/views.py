@@ -34,21 +34,38 @@ class ProfileView(OnlyYouMixin, DetailView):
         # applyings_m = user_data.applyingmember_set.all()
         # for applying_m in applyings_m:
         #     print(applying_m.group)
+        join_event = Join.objects.filter(join_name=self.request.user, join=True).order_by('join_event__event_date')
         return render(request, self.template_name,{
             'group_data_m':group_data_m,
             'group_data_s':group_data_s,
             'user_data':user_data,
+            'join_event':join_event,
         })
 
     def post(self, request, *args, **kwargs):
         user_data = CustomUser.objects.get(email=self.request.user)
         pk=user_data.pk
-        applying_member_pks = request.POST.getlist('applying_m_group')
-        print(applying_member_pks)
-        applying_member = ApplyingMember.objects.filter(pk__in=applying_member_pks, applying=True)
-        print(applying_member)
-        applying_member.delete()
+        if "applying_m_group" in request.POST:
+            applying_member_pks = request.POST.getlist('applying_m_group')
+            print(applying_member_pks)
+            applying_member = ApplyingMember.objects.filter(pk__in=applying_member_pks, applying=True)
+            print(applying_member)
+            applying_member.delete()
+
+        if "applying_s_group" in request.POST:
+            applying_staff_pks = request.POST.getlist('applying_s_group')
+            print(applying_staff_pks)
+            applying_staff = ApplyingStaff.objects.filter(pk__in=applying_staff_pks, applying=True)
+            print(applying_staff)
+            applying_staff.delete()
+            
+        elif "event_join" in request.POST:
+            join_pks = request.POST.getlist('event_join')
+            join = Join.objects.filter(pk__in=join_pks, join=True)
+            join.delete()
+            
         return HttpResponseRedirect( reverse_lazy('userprofile', kwargs={'pk':pk}))
+        
 
 class ProfileEditView(OnlyYouMixin, UpdateView):
     model = CustomUser

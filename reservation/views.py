@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic import TemplateView, View, UpdateView, CreateView, DeleteView
 from django.views.generic.detail import DetailView
 
-from .models import Group, Event, ApprovedMember, ApprovedStaff, ApplyingMember, ApplyingStaff
+from .models import *
 from .forms import EventForm, GroupForm
 from accounts.models import CustomUser
 from django.urls import reverse_lazy
@@ -132,14 +132,21 @@ class GroupDetailView(DetailView):
 
         applying_staffs=ApplyingStaff.objects.filter(group=group_data, applying=True)
         applying_members=ApplyingMember.objects.filter(group=group_data, applying=True)
-
-
+        join = Join.objects.filter(join_name=self.request.user, join=True)
+        j_event_list=[]
+        for j in join:
+            j_event_list.append(j.join_event.event_title) #参加するイベントのリストを作成
         member_names = {m_data.member for m_data in member_data}
         print("member_names:",member_names)
         staff_names = {s_data.staff for s_data in staff_data}
+
         """グループ加入の承認済みデータのリストに名前があり、かつapprovedでないと別ページにリダイレクトされる"""
+        print("staff names",staff_names)
         is_group_staff = self.request.user in staff_names
-   
+        is_group_member = self.request.user in member_names
+        group=self.get_object()
+        print(group.pk)
+
         ctx={
                 'group_data':group_data,
                 'member_data':member_data,
@@ -147,8 +154,10 @@ class GroupDetailView(DetailView):
                 'staff_names':staff_names,
                 'event_data':event_data,
                 'is_group_staff':is_group_staff,
+                'is_group_member':is_group_member,
                 'applying_staffs':applying_staffs,
                 'applying_members':applying_members,
+                'j_event_list': j_event_list,
 
             }
 
@@ -423,19 +432,56 @@ class GroupJoinView(View):
     def get(self, request, *args, **kwargs):
         group_data = Group.objects.get(id=self.kwargs['pk'])
         return render(request, 'reservation/group_join.html',{
-            'group_data': group_data
+            'group_data': group_data,
+            'staff_or_member':'メンバー',
         })
 
     def post(self, request, *args, **kwargs):
+        # if 'applying_s_group' in request.POST:#スタッフの加入許可の処理
         group_data = Group.objects.get(id=self.kwargs['pk'])
         user_data = CustomUser.objects.get(email=self.request.user)
         user_data.applyingmember_set.create(member=self.request.user, group=group_data, applying=True)
         pk=user_data.pk
         print(pk)
+     
+        return HttpResponseRedirect( reverse_lazy('userprofile', kwargs={'pk':pk}))
+
+class GroupJoinStaffView(View):
+    model=Group
+    def get(self, request, *args, **kwargs):
+        group_data = Group.objects.get(id=self.kwargs['pk'])
+        return render(request, 'reservation/group_join.html',{
+            'group_data': group_data,
+            'staff_or_member':'スタッフ',
+        })
+
+    def post(self, request, *args, **kwargs):
+        # if 'applying_s_group' in request.POST:#スタッフの加入許可の処理
+            group_data = Group.objects.get(id=self.kwargs['pk'])
+            user_data = CustomUser.objects.get(email=self.request.user)
+            user_data.applyingstaff_set.create(staff=self.request.user, group=group_data, applying=True)
+            pk=user_data.pk
+            print(pk)
+
+            return HttpResponseRedirect( reverse_lazy('userprofile', kwargs={'pk':pk}))
+
+
+class EventJoinView(View):
+    model=Event
+    def get(self, request, *args, **kwargs):
+        event = Event.objects.get(id=self.kwargs['pk'])
+        return render(request, 'reservation/event_join.html',{
+            'event': event
+        })
+
+    def post(self, request, *args, **kwargs):
+        event = Event.objects.get(id=self.kwargs['pk'])
+        user_data = CustomUser.objects.get(email=self.request.user)
+        user_data.join_set.create(join_name=self.request.user, join_event=event, join=True)
+        pk=user_data.pk
+        print(pk)
         #グループページに遷移
         # return HttpResponseRedirect( reverse_lazy('group'))
         return HttpResponseRedirect( reverse_lazy('userprofile', kwargs={'pk':pk}))
-
-
 
 
