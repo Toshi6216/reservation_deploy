@@ -1,20 +1,50 @@
 {% extends 'reservation/base.html' %}
 
 {% block content %}
-<h1>イベントカレンダー</h1>
+<h1>{{ group_data.group_name }} カレンダー</h1>
+<p><a class='btn btn-primary' href="{% url 'group_detail' group_data.pk %}">グループ詳細へ</a></p>
 <div class="row my-4 ">
-    <div class="col-md-8">
+    <div class="card col-md-5 my-2">
+        <div class="card-body">
+            <h4 class="card-title mb-3"><div hidden>#{{ group_data.pk }}</div>{{ group_data.group_name }} </h4><a href="# " class="btn btn-danger">スタッフ申請</a>
+            <h5>グループオーナー：{{ group_data.group_owner.nickname }}</h5>
+            <p class="card-text mb-3">{{ group_data.group_detail }}</p>
+            
+            <ul class="list-group listgroup-flush ">
 
-            <a class="btn btn-warning" href="{% url 'gp_event_cal' %}">今月</a>
-            <a class="btn btn-primary" href="{% url 'gp_event_cal' month_previous.year month_previous.month %}">前月</a>
-        
-            <a class="btn btn-primary" href="{% url 'gp_event_cal' month_next.year month_next.month %}">次月</a>
-            <h3>{{ month_current | date:"Y年m月" }}</h3>
+                <li class="list-group-item">
+                <p>【MEMBER】</p>
+                    {% for m_name in member_names %}
+                    {{ m_name.nickname }} &ensp;
+                    {% endfor %} 
+                </li> 
+                
+
+                <li class="list-group-item">
+                <p>【EVENT】</p>
+                    {% for event in event_data %}
+                    {{ event.event_title }} &ensp;
+                    {% endfor %} 
+                </li>
+            </ul> 
+        </div>
+       
+
+    </div>
+           
+
+    <div class="col-md-7">
+
+        <a class="btn btn-warning" href="{% url 'group_detail_cal' group_data.pk %}">今月</a>
+        <a class="btn btn-primary" href="{% url 'group_detail_cal' group_data.pk month_previous.year month_previous.month %}">前月</a>
+    
+        <a class="btn btn-primary" href="{% url 'group_detail_cal' group_data.pk month_next.year month_next.month %}">次月</a>
+        <h3>{{ month_current | date:"Y年m月" }}</h3>
 
         <div class="card border-info">
                 {% comment %} <table class="table border-dark " style="table-layout:fixed;"> {% endcomment %}
                 <table class="table border-dark " style="table-layout:fixed;">
-               
+            
                     <thead>
                         <tr >
                             {% for w in week_names %}
@@ -53,6 +83,8 @@
 
                 </table>
         </div>
+    </div>
+    
 
     <div class="card-deck d-flex flex-wrap" >
         {% for event in event_data %}
@@ -65,11 +97,9 @@
                 
                     <h5 class="card-title">#{{ event.id }}/{{ event.event_title }} <div class="date_class">{{event.event_date}}</div></h5>
                     <p>{{ event.start_time }}-{{ event.end_time }}</p>
-                    <p class="card-text ">{{ event.event_detail|truncatechars:100 }}</p>
-                    <p ><a href="{% url 'group_detail'  event.group.pk  %} " class="">{{ event.group }}</a></p>
-                    {% comment %} {% if user.email==approved_check.member %}
-                        <a href="{% url 'event_edit' event.pk  %} " class="nav-link">event編集</a>
-                    {% endif %} {% endcomment %}
+                    <p class="card-text ">{{ event.event_detail|truncatechars:20 }}</p>
+                    
+                    <p ><a href="{% url 'group_detail' event.group.pk  %} " class="btn btn-success">{{ event.group }}</a></p>
 
                 </div>
 
@@ -78,13 +108,7 @@
         {% endfor %}
     </div>  
  
-           </div> 
-        <div class="col-md-4">
-  
-            <div class="card">
-            <h5 class="card-header">group menber...</h5>
-            </div>
-        </div>
+
 
 
 {% endblock %}
