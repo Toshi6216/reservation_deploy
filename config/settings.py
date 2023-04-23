@@ -21,12 +21,15 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-$^1@=&p!3ipey$cat5hp7m^#5ng003ablf7qh&)x360*p0@^g$'
+
+from django.core.management.utils import get_random_secret_key
+SECRET_KEY = get_random_secret_key()  
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+# ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost', '.pythonanywhere.com', 'htoshijapan.pythonanywhere.com']
 
 
 # Application definition
@@ -166,3 +169,12 @@ ACCOUNT_ADAPTER = 'accounts.adapter.AccountAdapter'
 ACCOUNT_FORMS = {
     'signup' : 'accounts.forms.SignupForm',
 }
+
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = True
+
+#本番環境でlocal_settings.pyがなくてもエラーとならないように
+try:
+    from .local_settings import *
+except:
+    pass
