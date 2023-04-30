@@ -10,6 +10,11 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 
+try:
+    from .local_settings import *
+except ImportError:
+    pass
+
 from pathlib import Path
 from django.urls import reverse_lazy
 
@@ -21,15 +26,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-
-from django.core.management.utils import get_random_secret_key
-SECRET_KEY = get_random_secret_key()  
+# SECRET_KEY = 
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
-# ALLOWED_HOSTS = []
-ALLOWED_HOSTS = ['localhost', '.pythonanywhere.com', 'htoshijapan.pythonanywhere.com']
+ALLOWED_HOSTS = []
 
 
 # Application definition
@@ -170,11 +172,12 @@ ACCOUNT_FORMS = {
     'signup' : 'accounts.forms.SignupForm',
 }
 
-CSRF_COOKIE_SECURE = True
-SESSION_COOKIE_SECURE = True
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend' #メールのコンソール表示　デバッグ用
 
-#本番環境でlocal_settings.pyがなくてもエラーとならないように
-try:
-    from .local_settings import *
-except:
-    pass
+# メールサーバー用
+# EMAIL_HOST = 'smtp.gmail.com'
+# EMAIL_HOST_USER = 'toshimasa.doi.love.tap@gmail.com'
+
+# EMAIL_PORT = 587
+# EMAIL_USE_TLS = True
+FRONTEND_URL = 'http://127.0.0.1:8000/'

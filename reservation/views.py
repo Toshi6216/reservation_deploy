@@ -2,8 +2,8 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic import TemplateView, View, UpdateView, CreateView, DeleteView
 from django.views.generic.detail import DetailView
 
-from .models import Group, Event, ApprovedMember, ApprovedStaff, ApplyingMember, ApplyingStaff
-from .forms import EventForm, GroupForm
+from .models import Group, Event, ApprovedMember, ApprovedStaff, ApplyingMember, ApplyingStaff, Join
+from .forms import EventForm, GroupForm, SearchForm
 from accounts.models import CustomUser
 from django.urls import reverse_lazy
 from django.http import HttpResponse,HttpResponseRedirect
@@ -22,6 +22,8 @@ from django.urls import reverse
 from django.core.exceptions import ValidationError
 from django.contrib import messages
 from django.db import transaction
+from django.conf import settings
+from django.core.mail import BadHeaderError, send_mail
 
 # from dateutil.relativedelta import relativedelta 
 
@@ -37,7 +39,6 @@ class EventView(View):
         return render(request, 'reservation/event_index.html',{
             'event_data': event_data
         })
-                # 'is_group_staff':is_group_staff
     
 
 #グループ一覧
@@ -45,18 +46,40 @@ class GroupView(View):
     #このviewがコールされたら最初にget関数が呼ばれる
     def get(self, request, *args, **kwargs):
         group_data = Group.objects.order_by('-id') #新しいものから順番に並べる
-        for g in group_data:
-            print(g.group_owner.nickname)
+        # for g in group_data:
+        #     print(g.group_owner.nickname)
         user_data = CustomUser.objects.get(email=self.request.user)
-        member_data = ApprovedMember.objects.filter(member=request.user, 
-            group__in = group_data, approved = True)#memberデータ取得
+        member_data = ApprovedMember.objects.filter(
+            member=request.user, 
+            group__in = group_data, 
+            approved = True)#memberデータ取得
+        staff_data = ApprovedStaff.objects.filter(
+            staff=request.user, 
+            group__in = group_data, 
+            approved = True)#staffデータ取得
+        #グループ検索機能
+        searchForm = SearchForm(self.request.GET)
+        # print("searchForm:", searchForm)
+        #seachForm変数に正常なデータがあれば
+        if searchForm.is_valid():
+            keyword = searchForm.cleaned_data['keyword'] #keyword変数にフォームのキーワードを代入
+            group_data = Group.objects.filter(group_name__contains=keyword) #キーワードを含むレコードをfilterメソッドで抽出
+        else:
+            keyword = SearchForm()
+            group_data = Group.objects.order_by('-id') #新しいものから順番に並べる
+            # print("if else")
+
         
         approvedmember_grouplist=[]
         for m_data in member_data:
-            print(m_data.member,m_data.group, m_data.approved)
+            # print(m_data.member,m_data.group, m_data.approved)
             approvedmember_grouplist.append(m_data.group.group_name)
 
-        print("*****")
+        approvedstaff_grouplist=[]
+        for s_data in staff_data:
+            approvedstaff_grouplist.append(s_data.group.group_name)
+
+        # print("*****")
         applyingmember_grouplist=[]
         for apl_m_data in ApplyingMember.objects.filter(member=request.user,group__in=group_data, applying=True):
             print(apl_m_data.member,apl_m_data.group, apl_m_data.applying)
@@ -66,7 +89,9 @@ class GroupView(View):
             'group_data': group_data,
             'user_data': user_data,
             'approvedmember_grouplist': approvedmember_grouplist,
+            'approvedstaff_grouplist': approvedstaff_grouplist,
             'applyingmember_grouplist': applyingmember_grouplist,
+            'searchForm': searchForm,
 
         })
 
@@ -141,6 +166,11 @@ class GroupDetailView(DetailView):
         is_group_staff = self.request.user in staff_names
         is_group_member = self.request.user in member_names
 
+        join_event_list=[]
+        join_event=Join.objects.filter(join_name=self.request.user, join=True)
+        for j_ev in join_event:
+            join_event_list.append(j_ev.join_event.pk)
+        # print(join_event_list)
    
         ctx={
                 'group_data':group_data,
@@ -152,6 +182,7 @@ class GroupDetailView(DetailView):
                 'is_group_member':is_group_member,
                 'applying_staffs':applying_staffs,
                 'applying_members':applying_members,
+                'join_event_list': join_event_list,
 
             }
 
@@ -168,7 +199,7 @@ class GroupDetailView(DetailView):
         group = self.get_object()
         pk= group.pk
 
-        print(request.POST)
+        # print(request.POST)
         if 'applying_staff' in request.POST:#スタッフの加入許可の処理
             applying_staff_pks = request.POST.getlist('applying_staff')
             # print(applying_staff_pks, applying_member_pks)
@@ -348,7 +379,7 @@ class GroupDetailCalView(mixins.MonthCalendarMixin, DetailView):
         self.object=self.get_object()
         context = self.get_context_data(object=self.object)
         group_data = Group.objects.get(id=self.kwargs['pk'])
-        event_data = Event.objects.filter(group=group_data)
+        event_data = Event.objects.filter(group=group_data).order_by('event_date')
         member_data = ApprovedMember.objects.filter( #memberデータ取得
             group = group_data, approved = True)
 
@@ -376,7 +407,9 @@ class GroupDetailCalView(mixins.MonthCalendarMixin, DetailView):
         context['applying_staffs']=applying_staffs
         context['applying_members']=applying_members
 
-        if (request.user in staff_names) or  (request.user in member_names):
+        # if (request.user in staff_names) or  (request.user in member_names):
+        if is_group_member or is_group_staff :
+
             return  self.render_to_response(context)
 
         else:
@@ -456,7 +489,7 @@ class EventDeleteView(View):
     def post(self, request, *args, **kwargs):
         event_data = Event.objects.get(id=self.kwargs['pk'])
         pk = event_data.group.pk
-        print(pk)
+        # print(pk)
         event_data.delete()
         #削除したイベントのグループページに遷移
         return HttpResponseRedirect( reverse_lazy('group_detail', kwargs={'pk':pk}))
@@ -490,11 +523,18 @@ class EventDetailView(DetailView):
     def get(self, request, *args, **kwargs):
         event = Event.objects.get(id=self.kwargs['pk'])
         
+        is_join=False
+        for join_event in event.join_set.all():
+            print(join_event.join_name)
+            if self.request.user==join_event.join_name:
+                is_join=True
+       
         return render(request, self.template_name,{
-            'event': event
+            'event': event,
+            'is_join': is_join,
         })
 
-class GroupJoinView(View): #メンバー申請許可
+class GroupJoinView(View): #メンバー申請
     model=Group
     def get(self, request, *args, **kwargs):
         group_data = Group.objects.get(id=self.kwargs['pk'])
@@ -506,14 +546,32 @@ class GroupJoinView(View): #メンバー申請許可
     def post(self, request, *args, **kwargs):
         group_data = Group.objects.get(id=self.kwargs['pk'])
         user_data = CustomUser.objects.get(email=self.request.user)
-        user_data.applyingmember_set.create(member=self.request.user, group=group_data, applying=True)
-        pk=user_data.pk
-        print(pk)
+        # print(pk)
         #グループページに遷移
         # return HttpResponseRedirect( reverse_lazy('group'))
+
+        #メール送信用データ生成######
+        subject = "グループ加入申請(member)"
+        message = "「{}」に、".format(group_data.group_name) + "{0}({1})がメンバー申請しました。\n".format(user_data, user_data.nickname) + settings.FRONTEND_URL + "group_detail/{}/".format(group_data.pk) 
+        sender = settings.EMAIL_HOST_USER
+
+        group_staff_query = group_data.approvedstaff_set.all()
+        # print("group_staff_query:", group_staff_query)
+        recipients = []
+        for gp in group_staff_query:
+            group = gp.staff.email
+            # print(group.staff)
+            recipients.append(group)
+        # print("send_mail:", subject, message, sender, recipients)
+        #メール送信用データ生成(ここまで)######
+       
+        user_data.applyingmember_set.create(member=self.request.user, group=group_data, applying=True)
+        pk=user_data.pk
+        send_mail(subject, message, sender, recipients) #通知メール送信
+    
         return HttpResponseRedirect( reverse_lazy('userprofile', kwargs={'pk':pk}))
 
-class GroupJoinStaffView(View): #スタッフ申請許可
+class GroupJoinStaffView(View): #スタッフ申請
     model=Group
     def get(self, request, *args, **kwargs):
         group_data = Group.objects.get(id=self.kwargs['pk'])
@@ -527,7 +585,7 @@ class GroupJoinStaffView(View): #スタッフ申請許可
         user_data = CustomUser.objects.get(email=self.request.user)
         user_data.applyingstaff_set.create(staff=self.request.user, group=group_data, applying=True)
         pk=user_data.pk
-        print(pk)
+        # print(pk)
 
         return HttpResponseRedirect( reverse_lazy('userprofile', kwargs={'pk':pk}))
 
@@ -544,7 +602,10 @@ class EventJoinView(View): #イベント予約
         event = Event.objects.get(id=self.kwargs['pk'])
         user_data = CustomUser.objects.get(email=self.request.user)
         user_data.join_set.create(join_name=self.request.user, join_event=event, join=True)
-        pk=user_data.pk
-        print(pk)
+        # pk=user_data.pk
+        pk=event.group.pk
+        # print(pk)
         
-        return HttpResponseRedirect( reverse_lazy('userprofile', kwargs={'pk':pk}))
+        # return HttpResponseRedirect( reverse_lazy('userprofile', kwargs={'pk':pk}))
+        return HttpResponseRedirect( reverse_lazy('group_detail', kwargs={'pk':pk}))
+    
