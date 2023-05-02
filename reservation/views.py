@@ -148,7 +148,7 @@ class GroupDetailView(DetailView):
     def get(self, request, *args, **kwargs):
         print("getメソッド")
         group_data = Group.objects.get(id=self.kwargs['pk'])
-        event_data = Event.objects.filter(group=group_data)
+        event_data = Event.objects.filter(group=group_data).order_by('event_date')
         member_data = ApprovedMember.objects.filter( #memberデータ取得
             group = group_data, approved = True)
 
@@ -607,5 +607,5 @@ class EventJoinView(View): #イベント予約
         # print(pk)
         
         # return HttpResponseRedirect( reverse_lazy('userprofile', kwargs={'pk':pk}))
-        return HttpResponseRedirect( reverse_lazy('group_detail', kwargs={'pk':pk}))
+        return HttpResponseRedirect( reverse_lazy('group_detail_cal', kwargs={'pk':pk}))
     

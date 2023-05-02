@@ -12,12 +12,11 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 from pathlib import Path
 import os
 
-try:
-    from .local_settings import *
-except ImportError:
-    pass
+# try:
+#     from .local_settings import *
+# except ImportError:
+#     pass
 
-from pathlib import Path
 from django.urls import reverse_lazy
 
 CSRF_COOKIE_SECURE = True
@@ -37,10 +36,12 @@ SECRET_KEY = get_random_secret_key()
 
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+# DEBUG = False
+DEBUG = True
 
-# ALLOWED_HOSTS = []
-ALLOWED_HOSTS = ['.pythonanywhere.com']
+
+ALLOWED_HOSTS = []
+# ALLOWED_HOSTS = ['.pythonanywhere.com']
 
 RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
 if RENDER_EXTERNAL_HOSTNAME:
@@ -193,6 +194,8 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend' #メールのコ�
 
 
 FRONTEND_URL = 'http://127.0.0.1:8000/'
+FRONTEND_URL = 'http://htoshijapan.pythonanywhere.com/'
+
 
 
 MEDIA_URL = '/media/'
