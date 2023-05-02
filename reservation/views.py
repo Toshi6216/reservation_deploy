@@ -562,12 +562,12 @@ class GroupJoinView(View): #メンバー申請
             group = gp.staff.email
             # print(group.staff)
             recipients.append(group)
-        # print("send_mail:", subject, message, sender, recipients)
+        print("send_mail:", subject, message, sender, recipients)
         #メール送信用データ生成(ここまで)######
        
         user_data.applyingmember_set.create(member=self.request.user, group=group_data, applying=True)
         pk=user_data.pk
-        send_mail(subject, message, sender, recipients) #通知メール送信
+        # send_mail(subject, message, sender, recipients) #通知メール送信
     
         return HttpResponseRedirect( reverse_lazy('userprofile', kwargs={'pk':pk}))
 

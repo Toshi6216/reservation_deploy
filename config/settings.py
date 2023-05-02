@@ -9,6 +9,8 @@ https://docs.djangoproject.com/en/3.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.2/ref/settings/
 """
+from pathlib import Path
+import os
 
 try:
     from .local_settings import *
@@ -17,6 +19,9 @@ except ImportError:
 
 from pathlib import Path
 from django.urls import reverse_lazy
+
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = True
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -27,11 +32,20 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
 # SECRET_KEY = 
+from django.core.management.utils import get_random_secret_key
+SECRET_KEY = get_random_secret_key()
+
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+# ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['.pythonanywhere.com']
+
+RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
+if RENDER_EXTERNAL_HOSTNAME:
+    ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
+
 
 
 # Application definition
@@ -172,12 +186,19 @@ ACCOUNT_FORMS = {
     'signup' : 'accounts.forms.SignupForm',
 }
 
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend' #メールのコンソール表示　デバッグ用
+# EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend' #メールのコンソール表示　デバッグ用
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend' #メールのコンソール表示　本番用
 
-# メールサーバー用
-# EMAIL_HOST = 'smtp.gmail.com'
-# EMAIL_HOST_USER = 'toshimasa.doi.love.tap@gmail.com'
 
-# EMAIL_PORT = 587
-# EMAIL_USE_TLS = True
+
+
 FRONTEND_URL = 'http://127.0.0.1:8000/'
+
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+STATIC_URL = '/assets/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+# STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
