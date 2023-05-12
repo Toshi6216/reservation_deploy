@@ -148,7 +148,7 @@ class GroupDetailView(DetailView):
     def get(self, request, *args, **kwargs):
         print("getメソッド")
         group_data = Group.objects.get(id=self.kwargs['pk'])
-        event_data = Event.objects.filter(group=group_data).order_by('event_date')
+        event_data = Event.objects.filter(group=group_data).order_by('event_date', 'start_time')
         member_data = ApprovedMember.objects.filter( #memberデータ取得
             group = group_data, approved = True)
 
@@ -356,8 +356,8 @@ class GpEventCalView(mixins.MonthCalendarMixin, generic.TemplateView):
 
         chk_m=[ap_chk_m.group for ap_chk_m in approved_check_m]
         chk_s=[ap_chk_s.group for ap_chk_s in approved_check_s]
-        
-        event_data = Event.objects.filter(Q(group__in=chk_m)|Q(group__in=chk_s)).order_by('event_date')#所属しているグループのイベントでフィルター
+        date_starttime_order = ('event_date', 'start_time')
+        event_data = Event.objects.filter(Q(group__in=chk_m)|Q(group__in=chk_s)).order_by('event_date', 'start_time')#所属しているグループのイベントでフィルター
         days={event_days.event_date for event_days in event_data }
 
         context.update(calendar_context)
@@ -379,7 +379,7 @@ class GroupDetailCalView(mixins.MonthCalendarMixin, DetailView):
         self.object=self.get_object()
         context = self.get_context_data(object=self.object)
         group_data = Group.objects.get(id=self.kwargs['pk'])
-        event_data = Event.objects.filter(group=group_data).order_by('event_date')
+        event_data = Event.objects.filter(group=group_data).order_by('event_date', 'start_time')
         member_data = ApprovedMember.objects.filter( #memberデータ取得
             group = group_data, approved = True)
 
@@ -426,7 +426,7 @@ class GroupDetailCalView(mixins.MonthCalendarMixin, DetailView):
         chk_m=[ap_chk_m.group for ap_chk_m in approved_check_m]
         chk_s=[ap_chk_s.group for ap_chk_s in approved_check_s]
         
-        event_data = Event.objects.filter(group=pk).order_by('event_date')#指定グループのイベントでフィルター
+        event_data = Event.objects.filter(group=pk).order_by('event_date', 'start_time')#指定グループのイベントでフィルター
         days={event_days.event_date for event_days in event_data }
 
         group_data = Group.objects.get(id=self.kwargs['pk'])
@@ -533,7 +533,7 @@ class EventDetailView(DetailView):
             'event': event,
             'is_join': is_join,
         })
-
+    
 class GroupJoinView(View): #メンバー申請
     model=Group
     def get(self, request, *args, **kwargs):
@@ -553,23 +553,31 @@ class GroupJoinView(View): #メンバー申請
         #メール送信用データ生成######
         subject = "グループ加入申請(member)"
         message = "「{}」に、".format(group_data.group_name) + "{0}({1})がメンバー申請しました。\n".format(user_data, user_data.nickname) + settings.FRONTEND_URL + "group_detail/{}/".format(group_data.pk) 
+
         sender = settings.EMAIL_HOST_USER
 
         group_staff_query = group_data.approvedstaff_set.all()
         # print("group_staff_query:", group_staff_query)
         recipients = []
         for gp in group_staff_query:
-            group = gp.staff.email
-            # print(group.staff)
-            recipients.append(group)
-        print("send_mail:", subject, message, sender, recipients)
+            group_send_to = gp.staff.email
+            recipients.append(group_send_to)
+        # send_mail(subject, message, sender, recipients) #通知メール送信
+        # print("send_mail:", subject, message, sender, recipients)
         #メール送信用データ生成(ここまで)######
+        try:
+            send_mail(subject, message, sender, recipients) #通知メール送信
+            print("send_mail:", subject, message, sender, recipients)
+            
+        except BadHeaderError:
+            return HttpResponse('無効なヘッダーが見つかりました。')
        
         user_data.applyingmember_set.create(member=self.request.user, group=group_data, applying=True)
         pk=user_data.pk
-        # send_mail(subject, message, sender, recipients) #通知メール送信
+        
     
         return HttpResponseRedirect( reverse_lazy('userprofile', kwargs={'pk':pk}))
+
 
 class GroupJoinStaffView(View): #スタッフ申請
     model=Group
