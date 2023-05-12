@@ -5,8 +5,9 @@ from django.forms import widgets
 import datetime
 
 class EventForm(forms.ModelForm):
-    start_time = forms.TimeField(widget=forms.TimeInput(attrs={'type': 'time'}))
-    end_time = forms.TimeField(widget=forms.TimeInput(attrs={'type': 'time'}))
+
+    start_time = forms.TimeField(label="開始時刻",widget=forms.TimeInput(attrs={'type': 'time'}))
+    end_time = forms.TimeField(label="終了時刻", widget=forms.TimeInput(attrs={'type': 'time'}))
 
     class Meta:
         model = Event
@@ -19,6 +20,11 @@ class EventForm(forms.ModelForm):
             "end_time",
     
         ]
+        labels={
+            "event_title":"タイトル", 
+            "event_detail":"内容",
+            "event_date":"開催日",
+        }
 
 class SearchForm(forms.Form):
     keyword = forms.CharField(
