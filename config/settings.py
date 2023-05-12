@@ -42,12 +42,13 @@ except ImportError:
     SECRET_KEY = get_random_secret_key()
     FRONTEND_URL = 'https://htoshijapan.pythonanywhere.com/'
     ALLOWED_HOSTS = ['.pythonanywhere.com']
+    
 
 
 # メールサーバー用
 EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_HOST_USER = 'app.info.service.ht@gmail.com'
-
+EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
+EMAIL_HOST_PASSWORD=os.getenv("EMAIL_HOST_PASSWORD")
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 
