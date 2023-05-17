@@ -9,18 +9,15 @@ https://docs.djangoproject.com/en/3.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.2/ref/settings/
 """
+
+
 from pathlib import Path
+from django.urls import reverse_lazy
 import os
 
-# try:
-#     from .local_settings import *
-# except ImportError:
-#     pass
-
-from django.urls import reverse_lazy
-
-CSRF_COOKIE_SECURE = True
-SESSION_COOKIE_SECURE = True
+from django.core.management.utils import get_random_secret_key
+from dotenv import load_dotenv
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -29,39 +26,23 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
+# SECURITY WARNING: keep the secret key used in production secret!
+# SECRET_KEY = 
+
 # SECURITY WARNING: don't run with debug turned on in production!
-# DEBUG = False
+
+
 try:
     from .local_settings import *
     DEBUG = True
-    FRONTEND_URL = 'http://127.0.0.1:8000/'
     ALLOWED_HOSTS = []
+    FRONTEND_URL = 'http://127.0.0.1:8000/accounts/login/?next=/'
 except ImportError:
     DEBUG = False
     from django.core.management.utils import get_random_secret_key
     SECRET_KEY = get_random_secret_key()
-    FRONTEND_URL = 'https://htoshijapan.pythonanywhere.com/'
     ALLOWED_HOSTS = ['.pythonanywhere.com']
-    
-
-
-# メールサーバー用
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
-EMAIL_HOST_PASSWORD=os.getenv("EMAIL_HOST_PASSWORD")
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-
-
-# SECURITY WARNING: keep the secret key used in production secret!
-# SECRET_KEY = 
-
-
-
-RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
-if RENDER_EXTERNAL_HOSTNAME:
-    ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
-
+    FRONTEND_URL = 'https://htoshijapan.pythonanywhere.com/accounts/login/?next=/'
 
 
 # Application definition
@@ -167,6 +148,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
 
 STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
@@ -188,7 +170,7 @@ ACCOUNT_AUTHENTICATION_METHOD = 'email'
 ACCOUNT_EMAIL_REQUIRED = True
 
 #メールアドレスが確認済である必要がある
-ACCOUNT_EMAIL_VERIFICATION = 'none'
+# ACCOUNT_EMAIL_VERIFICATION = 'none'
 
 #usernameは使用しない
 ACCOUNT_USERNAME_REQUIRED = False
@@ -203,14 +185,15 @@ ACCOUNT_FORMS = {
 }
 
 # EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend' #メールのコンソール表示　デバッグ用
-# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend' #メールのコンソール表示　本番用
+# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 
 
+# メールサーバー用
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
+EMAIL_HOST_PASSWORD=os.getenv("EMAIL_HOST_PASSWORD")
 
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
 
 
-STATIC_ROOT = os.path.join(BASE_DIR, 'static')
-
-# STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
