@@ -512,17 +512,23 @@ class EventCreateView(LoginRequiredMixin, CreateView):
         sender = settings.EMAIL_HOST_USER
 
         group_staff_query = group_data.approvedstaff_set.all()
+        group_member_query = group_data.approvedmember_set.all()
+
         # print("group_staff_query:", group_staff_query)
         recipients = []
         for gp in group_staff_query:
             group_send_to = gp.staff.email
             recipients.append(group_send_to)
+        for gp_m in group_member_query:
+            group_send_to_m = gp_m.member.email
+            recipients.append(group_send_to_m)
+        recipients = set(recipients)
         # send_mail(subject, message, sender, recipients) #通知メール送信
         # print("send_mail:", subject, message, sender, recipients)
         #メール送信用データ生成(ここまで)######
         try:
             send_mail(subject, message, sender, recipients) #通知メール送信
-            # print("send_mail:", subject, message, sender, recipients)
+            print("send_mail:", subject, message, sender, recipients)
             
         except BadHeaderError:
             return HttpResponse('無効なヘッダーが見つかりました。')
