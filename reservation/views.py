@@ -261,7 +261,7 @@ class GroupDetailView(LoginRequiredMixin,DetailView):
 
             return HttpResponseRedirect( reverse_lazy('group_detail', kwargs={'pk':pk}))
 
-            return redirect('group_detail', pk=pk)
+           # return redirect('group_detail', pk=pk)
         
         elif 'applying_member' in request.POST:#メンバーの加入許可の処理
             applying_member_pks = request.POST.getlist('applying_member')
@@ -309,6 +309,10 @@ class GroupDetailView(LoginRequiredMixin,DetailView):
             return HttpResponseRedirect( reverse_lazy('group_detail', kwargs={'pk':pk}))
 
             # return redirect('group_detail', pk=pk)
+
+        else:
+
+            return HttpResponseRedirect( reverse_lazy('group_detail', kwargs={'pk':pk}))
         
 #グループ詳細
 # from django.views.generic.detail import DetailView
@@ -499,8 +503,8 @@ class EventCreateView(LoginRequiredMixin, CreateView):
         return super().get(request)
     
     def get_success_url(self):
-        pk = self.object.group.pk
-        return reverse('group_detail', kwargs={'pk':pk})
+        g_pk = self.object.group.pk
+        return reverse('group_detail', kwargs={'pk':g_pk})
     
     def form_valid(self, form):
         n_event_title = form.cleaned_data["event_title"]
@@ -514,41 +518,46 @@ class EventCreateView(LoginRequiredMixin, CreateView):
         obj.group = Group.objects.get(id=self.kwargs['pk'])
         # print(obj.pk)
         obj.save()
-        new_event = Event.objects.get(event_title=n_event_title)
+
+        #2024.10.12>>>
+        #new_event = Event.objects.get(event_title=n_event_title)
+        new_event = obj
+        print(new_event.pk)
+        #<<<2024.10.12
+
         # print(new_event.pk)
         
-    ### メール通知 ###
-        group_data = Group.objects.get(id=self.kwargs['pk'])
-        user_data = CustomUser.objects.get(email=self.request.user)
+    ### メール通知 ###　
+        # group_data = Group.objects.get(id=self.kwargs['pk'])
+        # user_data = CustomUser.objects.get(email=self.request.user)
 
-        #メール送信用データ生成######
-        subject = "グループ「{}」のイベント追加".format(group_data.group_name)
-        # message = "「{}」に、".format(group_data.group_name) + "{0}({1})がメンバー申請しました。\n".format(user_data, user_data.nickname) + settings.FRONTEND_URL + "group_detail/{}/".format(group_data.pk) 
-        message = "グループ「{}」のイベントが追加されました。\n".format(group_data.group_name) +  "グループ：{0}\nイベント：{1}\n開催日：{2}\n時間：{3}～{4}\n".format(group_data.group_name, n_event_title, n_event_date, start_time, end_time) + settings.FRONTEND_URL + "event_detail/{}/".format(new_event.pk) 
-        sender = settings.EMAIL_HOST_USER
-        group_staff_query = group_data.approvedstaff_set.all()
-        group_member_query = group_data.approvedmember_set.all()
+        # #メール送信用データ生成######
+        # subject = "グループ「{}」のイベント追加".format(group_data.group_name)
+        # # message = "「{}」に、".format(group_data.group_name) + "{0}({1})がメンバー申請しました。\n".format(user_data, user_data.nickname) + settings.FRONTEND_URL + "group_detail/{}/".format(group_data.pk) 
+        # message = "グループ「{}」のイベントが追加されました。\n".format(group_data.group_name) +  "グループ：{0}\nイベント：{1}\n開催日：{2}\n時間：{3}～{4}\n".format(group_data.group_name, n_event_title, n_event_date, start_time, end_time) + settings.FRONTEND_URL + "event_detail/{}/".format(new_event.pk) 
+        # sender = settings.EMAIL_HOST_USER
+        # group_staff_query = group_data.approvedstaff_set.all()
+        # group_member_query = group_data.approvedmember_set.all()
 
-        recipients = []
-        bcc = []
-        for gp in group_staff_query:
-            group_send_to = gp.staff.email
-            bcc.append(group_send_to)
-        for gp_m in group_member_query:
-            group_send_to_m = gp_m.member.email
-            bcc.append(group_send_to_m)
-        bcc = set(bcc)
-        msg = EmailMessage(subject, message, sender, recipients, bcc) #通知メール送信オブジェクトの作成
-        print("msg:", subject, message, sender, recipients, bcc)
-        #メール送信用データ生成(ここまで)######
-        try:
-            msg.send() #通知メール送信
+        # recipients = []
+        # bcc = []
+        # for gp in group_staff_query:
+        #     group_send_to = gp.staff.email
+        #     bcc.append(group_send_to)
+        # for gp_m in group_member_query:
+        #     group_send_to_m = gp_m.member.email
+        #     bcc.append(group_send_to_m)
+        # bcc = set(bcc)
+        # msg = EmailMessage(subject, message, sender, recipients, bcc) #通知メール送信オブジェクトの作成
+        # # print("msg:", subject, message, sender, recipients, bcc)
+        # #メール送信用データ生成(ここまで)######
+        # try:
+        #     msg.send() #通知メール送信
             
-        except BadHeaderError:
-            return HttpResponse('無効なヘッダーが見つかりました。')
+        # except BadHeaderError:
+        #     return HttpResponse('無効なヘッダーが見つかりました。')
     ### メール通知終わり ###
         
-
         return super().form_valid(form)
 
 class LoginMixinView(LoginRequiredMixin, View):
@@ -562,7 +571,7 @@ class EventDeleteView(LoginMixinView):
 
         # print(event_data.group.id)
         group_data = Group.objects.get(id=event_data.group.id)
-        print(group_data)
+        # print(group_data)
 
         staff_data = ApprovedStaff.objects.filter(
             group = group_data, approved=True)
@@ -646,8 +655,8 @@ class EventDetailView(DetailView):
 
         names = [data.staff for data in staff_data] 
         names_m = [data.member for data in member_data] 
-        print(names)
-        print(names_m)
+        # print(names)
+        # print(names_m)
 
         #スタッフユーザーで無ければHTMLを返す　遷移させる
         if not((request.user in names) or (request.user in names_m)):
@@ -698,7 +707,7 @@ class GroupJoinView(LoginMixinView): #メンバー申請
 
         bcc = set(bcc)
         msg = EmailMessage(subject, message, sender, recipients, bcc) #通知メール送信オブジェクトの作成
-        print("msg:", subject, message, sender, recipients, bcc)
+        # print("msg:", subject, message, sender, recipients, bcc)
         #メール送信用データ生成(ここまで)######
         try:
             msg.send() #通知メール送信
@@ -729,7 +738,7 @@ class GroupJoinStaffView(LoginMixinView): #スタッフ申請
     ### メール通知 ###
         #メール送信用データ生成######
         subject = "グループ加入申請(staff)"
-        message = "「{}」に、".format(group_data.group_name) + "{0}({1})がスタッフ申請しました。\n".format(user_data, user_data.nickname) + settings.FRONTEND_URL + "group_detail/{}/".format(group_data.pk) 
+        message = "「{}」に、".format(group_data.group_name) + "{0}さんがスタッフ申請しました。\n".format(user_data.nickname) + settings.FRONTEND_URL + "group_detail/{}/".format(group_data.pk) 
 
         sender = settings.EMAIL_HOST_USER
 
@@ -744,7 +753,7 @@ class GroupJoinStaffView(LoginMixinView): #スタッフ申請
 
         bcc = set(bcc)
         msg = EmailMessage(subject, message, sender, recipients, bcc) #通知メール送信オブジェクトの作成
-        print("msg:", subject, message, sender, recipients, bcc)
+        # print("msg:", subject, message, sender, recipients, bcc)
         #メール送信用データ生成(ここまで)######
         try:
             msg.send() #通知メール送信
@@ -799,7 +808,7 @@ class EventJoinView(LoginMixinView): #イベント予約
 
         bcc = set(bcc)
         msg = EmailMessage(subject, message, sender, recipients, bcc) #通知メール送信オブジェクトの作成
-        print("msg:", subject, message, sender, recipients, bcc)
+        # print("msg:", subject, message, sender, recipients, bcc)
         #メール送信用データ生成(ここまで)######
         try:
             msg.send() #通知メール送信

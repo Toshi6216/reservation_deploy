@@ -34,7 +34,7 @@ $(function(){
     $(this).addClass('table-danger active'); // クリックした日付のイベント情報を表示
     
     var active_date = $(this).find('.active').text()
-    console.log(active_date);
+    // console.log(active_date);
 
 
     $('.'+active_date).addClass("active_event");
@@ -72,8 +72,8 @@ function highlightDay(date, group_pk, month_current) { //グループのカレ�
   const dateRegex = /^(\d{4})年(\d{1,2})月(\d{1,2})日$/;
   const matches = date.match(dateRegex); // 正規表現で年、月、日を抽出
   const matches_current = month_current.match(dateRegex); // 正規表現で年、月を抽出(現在の年月)
-  console.log("date",date)
-  console.log(dateRegex)
+  // console.log("date",date)
+  // console.log(dateRegex)
   
   if (!matches) {
     console.error('Invalid date format:', date);

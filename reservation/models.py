@@ -4,7 +4,7 @@ from django.core.exceptions import ValidationError
 
 
 class Group(models.Model):
-    group_name = models.CharField(max_length=150)
+    group_name = models.CharField(max_length=150, unique=True)
     group_detail = models.TextField()
     group_owner = models.ForeignKey(
         CustomUser,
@@ -33,6 +33,14 @@ class Event(models.Model):
     event_date = models.DateField()
     start_time = models.TimeField()
     end_time = models.TimeField()
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["event_title", "event_date", "start_time", "end_time"],
+                name = "event_unique"
+            ),
+        ]
 
     def __str__(self):
         return self.event_title
@@ -98,10 +106,6 @@ class Join(models.Model):
     join_name = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     join_event = models.ForeignKey(Event, on_delete=models.CASCADE)
     join = models.BooleanField(default=False)
-    class Meta:
-        constraints = [
-            models.UniqueConstraint(
-                fields=["join_name","join_event"],
-                name = "join_unique"
-            ),
-        ]
+
+    def __str__(self):
+        return self.join_name
