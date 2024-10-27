@@ -80,7 +80,7 @@
                         {% for event in event_join %}
                             <p>
                             <label><input type="checkbox" name="event_join" value="{{ event.pk }}"><a href="{% url 'event_detail' event.join_event.pk %}">
-                            {{event.join_event.event_date}} {{ event.join_event }} (主催：{{ event.join_event.group }})</a></label>
+                            {{event.join_event.event_date|date:"Y/n/j"}} {{ event.join_event.start_time }} ｽﾀｰﾄ {{ event.join_event }} ({{ event.join_event.group }})</a></label>
                             </p>
                         {% endfor %}
                         {% if user.join_set.all %}
