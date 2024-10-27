@@ -311,7 +311,7 @@ class GroupDetailView(LoginRequiredMixin,DetailView):
             # return redirect('group_detail', pk=pk)
 
         else:
-            
+
             return HttpResponseRedirect( reverse_lazy('group_detail', kwargs={'pk':pk}))
         
 #グループ詳細
@@ -527,7 +527,7 @@ class EventCreateView(LoginRequiredMixin, CreateView):
 
         # print(new_event.pk)
         
-    ### メール通知 ###
+    ### メール通知 ###　
         # group_data = Group.objects.get(id=self.kwargs['pk'])
         # user_data = CustomUser.objects.get(email=self.request.user)
 
