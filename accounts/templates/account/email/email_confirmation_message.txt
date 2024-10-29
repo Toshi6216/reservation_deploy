@@ -1,10 +1,11 @@
-{% load account %}{% user_display user as user_display %}{% load i18n %}{% autoescape off %}{% blocktrans with site_name=current_site.name site_domain=current_site.domain %}こんにちは {{ site_name }} です。
 
-{{ user_display }} さんが {{ site_name }} にメールアドレスを登録しようとしています。
+{% load account %}{% user_display user as user_display %}{% load i18n %}{% autoescape off %}{% blocktrans with site_name=current_site.name site_domain=current_site.domain %}こんにちは「みんなの予約サイト」です。
+
+{{ user_display }} さんが「みんなの予約サイト」にメールアドレスを登録しようとしています。
 
 問題がなければ、確認のために以下のURLをクリックしてください。
 {{ activate_url }}
 {% endblocktrans %}
-{% blocktrans with site_name=current_site.name site_domain=current_site.domain %} {{ site_name }} をご利用いただきありがとうございます。
+{% blocktrans with site_name=current_site.name site_domain=current_site.domain %} 「みんなの予約サイト」 をご利用いただきありがとうございます。
 {{ site_domain }}{% endblocktrans %}
 {% endautoescape %}
