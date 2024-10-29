@@ -7,5 +7,5 @@
 {{ activate_url }}
 {% endblocktrans %}
 {% blocktrans with site_name=current_site.name site_domain=current_site.domain %} 「みんなの予約サイト」 をご利用いただきありがとうございます。
-{{ site_domain }}{% endblocktrans %}
+{% endblocktrans %}
 {% endautoescape %}
