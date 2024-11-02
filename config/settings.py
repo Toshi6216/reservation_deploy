@@ -170,6 +170,9 @@ AUTH_USER_MODEL = 'accounts.CustomUser'
 ACCOUNT_AUTHENTICATION_METHOD = 'email'
 ACCOUNT_EMAIL_REQUIRED = True
 
+ACCOUNT_EMAIL_SUBJECT_PREFIX = '' #email_conformation_message の件名の最初の部分
+#DEFAULT_FROM_EMAIL = '「みんなの予約サイト」'
+
 #メールアドレスが確認済である必要がある(確認メールからURLアクセスして認証)
 ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
 
