@@ -347,7 +347,7 @@ class GroupDetailView(LoginRequiredMixin,DetailView):
 class LoginMixinTemplateView(LoginRequiredMixin, generic.TemplateView):
     pass
 
-#カレンダーと全てのイベントを表示(使用しない)
+#カレンダーと全てのイベントを表示
 class EventCalView(mixins.MonthCalendarMixin, LoginMixinTemplateView):
     template_name = 'reservation/event_cal.html'
     model = Event
